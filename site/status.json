@@ -1,0 +1,27 @@
+{
+ "run_at": "2026-11-20 07:21",
+ "steps": {
+  "rs": "success",
+  "screener": "success",
+  "disposal": "success"
+ },
+ "as_of": {
+  "data": "2026-11-19",
+  "screener": "2026-11-19",
+  "pullback": "2026-11-19",
+  "disposal": "2026-11-19"
+ },
+ "pullback_error": null,
+ "screener_log_tail": [
+  "",
+  "1 Failed download:",
+  "['^TWOII']: possibly delisted; no timezone found",
+  "  已下載 1988/1988",
+  "[分析] 資料日 2026-11-19｜掃描 1984 檔｜趨勢模板通過 28｜新股通過 0",
+  "[輸出] output/2026-11-19/動能篩選_2026-11-19.xlsx",
+  "  畫圖失敗 2480 COH：No module named 'six'",
+  "[輸出] 1 張 K 線圖 → output/2026-11-19/charts",
+  "[輸出] 網站資料 output/site/screener.json（1 檔型態候選、28 檔通過趨勢模板）",
+  "[輸出] 抗跌股 output/site/pullback.json（最近回檔 2026-11-11～2026-11-19 加權 -13.2%，725 檔）"
+ ]
+}
