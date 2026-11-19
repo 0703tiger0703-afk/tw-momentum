@@ -2,7 +2,7 @@ name: 每日更新
 
 on:
   schedule:
-    - cron: "20 9 * * 1-5"   # 台北 17:20（週一到週五；GitHub 排程可能延遲 5–30 分鐘）
+    - cron: "30 6 * * 1-5"   # 台北 14:30（週一到週五；GitHub 排程可能延遲 5–30 分鐘）
   workflow_dispatch:          # 可在 Actions 頁面手動按「Run workflow」
 
 permissions:
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 75
+    timeout-minutes: 90
     env:
       TZ: Asia/Taipei
       PYTHONUNBUFFERED: "1"
@@ -37,14 +37,15 @@ jobs:
         id: rs
         working-directory: rs/scripts
         run: |
-          ok=0
-          for i in 1 2 3 4 5 6; do
+          today=$(date +%F)
+          for i in $(seq 1 10); do
             out=$(python -u market_data.py --max-seconds 900 2>&1 | tail -8); echo "$out"
-            if echo "$out" | grep -q '"complete": true'; then ok=1; break; fi
-            echo "第 $i 次未完成，2 分鐘後重試"; sleep 120
+            asof=$(python export_web.py --cached 2>&1 | tail -1 | python -c 'import sys,json;print(json.loads(sys.stdin.read()).get("as_of",""))' 2>/dev/null)
+            echo "RS 資料日：$asof"
+            if echo "$out" | grep -q '"complete": true' && [ "$asof" = "$today" ]; then break; fi
+            echo "第 $i 次：證交所／櫃買今天的資料還沒齊，3 分鐘後重試"; sleep 180
           done
-          [ "$ok" = 1 ] || echo "::warning::RS 資料更新未完成，改用既有快取輸出"
-          python export_web.py --cached 2>&1 | tail -3
+          [ "$asof" = "$today" ] || echo "::warning::RS 資料日是 $asof，不是今天（休市或官方尚未公布）"
           cp ../web/data.json ../../site/data.json
 
       - name: 型態篩選與抗跌股

@@ -91,6 +91,11 @@ html th { background: var(--panel); }
 .pbtag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 2px; }
 .pbtag.nh { background: var(--up-soft); color: var(--up); }
 .pbtag.s3 { background: var(--accent-soft); color: var(--accent); }
+.pbtag.pat { background: var(--accent); color: #fff; }
+.pbl .who .g { display: block; margin-top: 3px; }
+.pbgrp { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px; background: var(--chip); color: var(--ink); margin-right: 4px; }
+.pbgrp.off { color: var(--muted); }
+.pbkey { box-shadow: inset 0 0 0 2px var(--accent); }
 .pbmore { margin-top: 12px; }
 /* ---------- 處置股 ---------- */
 .dform { display: flex; gap: 8px; }
@@ -883,59 +888,70 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
 
 
   // ================= 抗跌股 =================
-  let PB = null, pbLeg = null, pbFil = "res", pbTT = false, pbShow = 60;
+  let PB = null, pbLeg = null;
   const pct1 = x => x == null ? "—" : (x > 0 ? "+" : "") + (x * 100).toFixed(1) + "%";
   const mdd = s => { const [y, m, d] = s.split("-"); return `${+m}/${+d}`; };
   const legIdx = (L, s) => s.m === "tpex" ? L.tpex : L.twse;
   const resist = (r, ix) => r != null && ix != null && r >= ix / 2;
   function legLabel(L) { return L.ongoing ? `${mdd(L.peak)} 起・進行中` : `${mdd(L.peak)}～${mdd(L.end)}`; }
+  let PBTH = null;
+  function pbThemes(code) {                       // 細分族群；沒有的話回傳 null
+    if (!PBTH) { PBTH = {}; for (const [t, cs] of Object.entries(D.theme_def || {})) for (const c of cs) (PBTH[c] = PBTH[c] || []).push(t); }
+    return PBTH[code] || null;
+  }
+  function pbRow(x, i, K) {
+    const s = x.s, th = pbThemes(s.c), it = SCMAP && SCMAP[s.c];
+    const grp = th ? th.slice(0, 2).map(t => `<span class="pbgrp">${esc(t)}</span>`).join("") : `<span class="pbgrp off">${esc(s.i || "未分類")}</span>`;
+    const dots = x.marks.map(m => `<i class="${m ? "on" : "off"}">${m ? "●" : "○"}</i>`).join("");
+    const sub = [`比${s.m === "tpex" ? "櫃買" : "加權"}${x.rel >= 0 ? "強" : "弱"} ${(Math.abs(x.rel) * 100).toFixed(1)}%`,
+      x.rs != null ? `RS ${x.rs}` : null, `距 52 週高 ${pct1(s.oh)}`].filter(Boolean).join("・");
+    const pat = it && it.listed ? `<span class="pbtag pat">${it.track === "新股" ? "新股・" : ""}${it.pattern}・${esc(it.status)}・加分 ${it.bn}</span>` : "";
+    return `<li><span class="rk">${i + 1}</span><button class="who" data-code="${s.c}"><b>${esc(s.n)}</b><span class="num">${s.c}</span>${pat}${s.nh ? '<span class="pbtag nh">近 5 日創新高</span>' : ""}
+        <span class="g">${grp}</span><span class="s">${esc(sub)}</span></button>
+      <span class="pct"><span class="v ${x.r > 0 ? "up" : x.r < 0 ? "down" : ""}">${pct1(x.r)}</span><span class="x dots" title="最近 ${K} 次回檔是否抗跌（舊→新）">${dots}</span></span></li>`;
+  }
   function renderPB() {
     if (!PB) { main.innerHTML = `<section class="panel"><h2>抗跌股資料載入失敗</h2><p class="muted">讀不到 pullback.json，可能今天的更新還沒完成。請稍後重新整理。</p></section>`; return; }
     const legs = PB.legs, K = legs.length;
     if (pbLeg == null || pbLeg >= K) pbLeg = K - 1;
     const L = legs[pbLeg];
-    const tt = new Set(SC && SC.tt_pass ? SC.tt_pass.map(r => r.code) : []);
     const all = PB.stocks.filter(s => s.r[pbLeg] != null).map(s => {
       const ix = legIdx(L, s), r = s.r[pbLeg];
       const marks = legs.map((LL, k) => s.r[k] == null ? null : resist(s.r[k], legIdx(LL, s)));
-      return { s, r, ix, rel: r - ix, marks, s3: marks.every(x => x === true), rs: D.stocks[s.c] ? D.stocks[s.c].rs : null, tt: tt.has(s.c) };
-    });
-    const nUp = all.filter(x => x.r > 0).length, nRes = all.filter(x => resist(x.r, x.ix)).length, n3 = all.filter(x => x.s3).length;
-    let rows = all.filter(x => pbFil === "up" ? x.r > 0 : pbFil === "s3" ? x.s3 : resist(x.r, x.ix));
-    if (pbTT) rows = rows.filter(x => x.tt);
-    rows.sort((a, b) => b.rel - a.rel);
+      return { s, r, ix, rel: r - ix, marks, rs: D.stocks[s.c] ? D.stocks[s.c].rs : null };
+    }).sort((a, b) => b.rel - a.rel);
+    const resAll = all.filter(x => resist(x.r, x.ix));
+    const top = all.slice(0, 20);
+    const both = resAll.filter(x => SCMAP && SCMAP[x.s.c] && SCMAP[x.s.c].listed);
+    // 前 20 名的族群分布
+    const cnt = {};
+    for (const x of top) for (const t of (pbThemes(x.s.c) || [x.s.i || "未分類"]).slice(0, 1)) cnt[t] = (cnt[t] || 0) + 1;
+    const dist = Object.entries(cnt).sort((a, b) => b[1] - a[1]).map(([t, n]) => `${esc(t)} ${n}`).join("、");
     const segs = legs.map((LL, k) => `<button class="stab" data-pbleg="${k}" aria-pressed="${k === pbLeg}">${legLabel(LL)}<span class="num">${pct1(LL.twse)}</span></button>`).reverse().join("");
-    const fil = [["res", `抗跌 ${nRes}`], ["up", `逆勢上漲 ${nUp}`], ["s3", `${K} 次都抗跌 ${n3}`]]
-      .map(([k, t]) => `<button class="stab" data-pbfil="${k}" aria-pressed="${pbFil === k}">${t}</button>`).join("");
     const reb = L.ongoing ? "" : `　之後到 ${mdd(PB.as_of)} 加權反彈 ${pct1(L.twse_rebound)}`;
-    const list = rows.slice(0, pbShow).map((x, i) => {
-      const s = x.s, dots = x.marks.map(m => `<i class="${m ? "on" : "off"}">${m ? "●" : "○"}</i>`).join("");
-      const sub = [`比${s.m === "tpex" ? "櫃買" : "加權"}${x.rel >= 0 ? "強" : "弱"} ${(Math.abs(x.rel) * 100).toFixed(1)}%`,
-        x.rs != null ? `RS ${x.rs}` : null, `距 52 週高 ${pct1(s.oh)}`, x.tt ? "通過趨勢模板" : null, s.i || null].filter(Boolean).join("・");
-      return `<li><span class="rk">${i + 1}</span><button class="who" data-code="${s.c}"><b>${esc(s.n)}</b><span class="num">${s.c}</span>${s.nh ? '<span class="pbtag nh">近 5 日創新高</span>' : ""}${x.s3 ? `<span class="pbtag s3">${K} 次都抗跌</span>` : ""}<span class="s">${esc(sub)}</span></button>
-        <span class="pct"><span class="v ${x.r > 0 ? "up" : x.r < 0 ? "down" : ""}">${pct1(x.r)}</span><span class="x dots" title="最近 ${K} 次回檔是否抗跌（舊→新）">${dots}</span></span></li>`;
-    }).join("");
-    main.innerHTML = `<section class="panel"><h2>抗跌股<small>大盤回檔時，跌得比大盤少、甚至逆勢上漲的股票</small></h2>
+    const sameDay = SC && SC.as_of === PB.as_of;
+    main.innerHTML = `<section class="panel"><h2>抗跌股<small>這一波大盤回檔中，最抗跌的股票</small></h2>
       <div class="subtabs" role="group" aria-label="選擇回檔">${segs}</div>
-      <p class="pbsum">加權 ${mdd(L.peak)} 高點到 ${mdd(L.end)} <b class="dn">${pct1(L.twse)}</b>，櫃買同期 <b class="dn">${pct1(L.tpex)}</b>（${L.days} 個交易日${L.ongoing ? "，還在回檔中" : ""}）${reb}。<br>
-      有流動性的 ${all.length} 檔裡，逆勢上漲 ${nUp} 檔、跌幅不到大盤一半 ${nRes} 檔。</p>
-      <div class="pbfil"><div class="subtabs" role="group" aria-label="篩選">${fil}</div>
-        <label><input type="checkbox" id="pbtt" ${pbTT ? "checked" : ""}> 只看通過趨勢模板</label></div></section>
-    <section class="panel">${rows.length ? `<ul class="pbl">${list}</ul>${rows.length > pbShow ? `<div class="pbmore"><button class="btn" type="button" id="pbmore">再顯示 ${Math.min(60, rows.length - pbShow)} 檔（共 ${rows.length} 檔）</button></div>` : ""}`
-      : '<p class="muted" style="margin:0">沒有符合條件的股票。</p>'}</section>
+      <p class="pbsum">加權 ${mdd(L.peak)} 高點到 ${mdd(L.end)} <b class="dn">${pct1(L.twse)}</b>，櫃買同期 <b class="dn">${pct1(L.tpex)}</b>（${L.days} 個交易日${L.ongoing ? "，還在回檔中" : ""}）${reb}。
+      有流動性的 ${all.length} 檔裡，跌幅不到大盤一半的有 ${resAll.length} 檔。</p></section>
+    <section class="panel pbkey"><h2>抗跌＋型態成型<small>抗跌，而且符合篩選清單的必要條件（${SC ? `型態資料日 ${mdd(SC.as_of)}` : "型態資料未載入"}）</small></h2>
+      ${both.length ? `<ul class="pbl">${both.map((x, i) => pbRow(x, i, K)).join("")}</ul>`
+        : `<p class="muted" style="margin:0">這段回檔裡的抗跌股，目前沒有型態成型的。${SC ? `篩選清單今天共 ${SC.items.filter(it => it.listed).length} 檔成型。` : ""}</p>`}
+      ${sameDay ? "" : `<p class="dmeta">抗跌資料日 ${mdd(PB.as_of)} 與型態資料日不同，結果可能差一天。</p>`}</section>
+    <section class="panel"><h2>最抗跌前 20 名<small>依比大盤強多少排序</small></h2>
+      <p class="dmeta" style="margin:0 0 6px">族群分布：${dist}</p>
+      <ul class="pbl">${top.map((x, i) => pbRow(x, i, K)).join("")}</ul></section>
     <section class="guide" aria-label="說明"><section><h3>怎麼算</h3><ul>
       <li><b>大盤回檔</b>　加權指數收盤從波段高點拉回 5% 以上；從低點反彈 5% 才算這段結束，還在跌的比到最新一天</li>
-      <li><b>同期漲跌</b>　個股在同一段日期（高點那天收盤到結束那天收盤）的漲跌幅；上市股比加權、上櫃股比櫃買</li>
-      <li><b>抗跌</b>　跌幅不到指數的一半，包含逆勢上漲；依「比大盤強多少」排序</li></ul></section>
-      <section><h3>圓點</h3><ul><li>最近 ${K} 次大盤回檔是否抗跌，由舊到新；藍色實心＝抗跌</li><li>每次都抗跌的股票，代表跌勢中一直有人在買</li></ul></section>
-      <section><h3>範圍</h3><ul><li>股價 ≥ 10 元、20 日均成交額 ≥ 3,000 萬</li><li>每個交易日傍晚跟著篩選程式一起更新，資料日 ${mdd(PB.as_of)}</li></ul></section></section>`;
+      <li><b>同期漲跌</b>　個股在同一段日期的漲跌幅；上市股比加權、上櫃股比櫃買</li>
+      <li><b>抗跌</b>　跌幅不到指數的一半，包含逆勢上漲</li>
+      <li><b>型態成型</b>　和「篩選清單」分頁同一套標準：趨勢模板、RS、右上角、下跌量縮等必要條件全部通過</li></ul></section>
+      <section><h3>族群與圓點</h3><ul><li>族群用「細分族群」的分類；沒有被分進細分族群的，灰色顯示官方產業</li><li>圓點是最近 ${K} 次大盤回檔是否抗跌，由舊到新；藍色實心＝抗跌</li></ul></section>
+      <section><h3>範圍</h3><ul><li>股價 ≥ 10 元、20 日均成交額 ≥ 3,000 萬</li><li>每個交易日傍晚更新，資料日 ${mdd(PB.as_of)}</li></ul></section></section>`;
   }
   document.addEventListener("click", e => {
-    const a = e.target.closest("[data-pbleg]"); if (a) { pbLeg = +a.dataset.pbleg; pbShow = 60; renderPB(); return; }
-    const f = e.target.closest("[data-pbfil]"); if (f) { pbFil = f.dataset.pbfil; pbShow = 60; renderPB(); return; }
-    if (e.target.id === "pbmore") { pbShow += 60; renderPB(); }
+    const a = e.target.closest("[data-pbleg]"); if (a) { pbLeg = +a.dataset.pbleg; renderPB(); }
   });
-  document.addEventListener("change", e => { if (e.target.id === "pbtt") { pbTT = e.target.checked; pbShow = 60; renderPB(); } });
 
   // ================= 處置股 =================
   let DP = null, dpSel = null, HOLD = [], holdDoc = null, holdMode = "local", holdQ = Promise.resolve();
