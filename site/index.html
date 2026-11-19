@@ -906,7 +906,7 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
     const sub = [`比${s.m === "tpex" ? "櫃買" : "加權"}${x.rel >= 0 ? "強" : "弱"} ${(Math.abs(x.rel) * 100).toFixed(1)}%`,
       x.rs != null ? `RS ${x.rs}` : null, `距 52 週高 ${pct1(s.oh)}`].filter(Boolean).join("・");
     const pat = it && it.listed ? `<span class="pbtag pat">${it.track === "新股" ? "新股・" : ""}${it.pattern}・${esc(it.status)}・加分 ${it.bn}</span>` : "";
-    return `<li><span class="rk">${i + 1}</span><button class="who" data-code="${s.c}"><b>${esc(s.n)}</b><span class="num">${s.c}</span>${pat}${s.nh ? '<span class="pbtag nh">近 5 日創新高</span>' : ""}
+    return `<li data-code="${s.c}" style="cursor:pointer"><span class="rk">${i + 1}</span><button class="who" data-code="${s.c}"><b>${esc(s.n)}</b><span class="num">${s.c}</span>${pat}${s.nh ? '<span class="pbtag nh">近 5 日創新高</span>' : ""}
         <span class="g">${grp}</span><span class="s">${esc(sub)}</span></button>
       <span class="pct"><span class="v ${x.r > 0 ? "up" : x.r < 0 ? "down" : ""}">${pct1(x.r)}</span><span class="x dots" title="最近 ${K} 次回檔是否抗跌（舊→新）">${dots}</span></span></li>`;
   }
@@ -1104,7 +1104,7 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
 
   // ---------- 點擊委派 ----------
   document.addEventListener("click", e => {
-    const t = e.target.closest("[data-code],[data-g],[data-theme],[data-ind],.tab");
+    const t = e.target.closest("[data-code],[data-g],[data-theme]:not(:root),[data-ind]:not(:root),.tab");  // 最外層的 data-theme 是深淺色模式，不是族群
     if (!t || !D) return;
     if (t.classList.contains("tab")) {
       const v = t.dataset.view; setTab(v);
