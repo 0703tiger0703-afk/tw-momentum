@@ -1,0 +1,8 @@
+config.sh
+.DS_Store
+__pycache__/
+*.pyc
+screener/output/
+screener/cache/*.pkl
+rs/scripts/.cache/daily_fill.tgz
+rs/scripts/.cache/*.log

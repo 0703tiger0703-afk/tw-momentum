@@ -1,0 +1,95 @@
+name: 每日更新
+
+on:
+  schedule:
+    - cron: "20 9 * * 1-5"   # 台北 17:20（週一到週五；GitHub 排程可能延遲 5–30 分鐘）
+  workflow_dispatch:          # 可在 Actions 頁面手動按「Run workflow」
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    env:
+      TZ: Asia/Taipei
+      PYTHONUNBUFFERED: "1"
+      FINMIND_TOKEN: ${{ secrets.FINMIND_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: 安裝中文字型與套件
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk >/dev/null
+          pip install -q -r requirements.txt
+
+      - name: RS 族群資料
+        id: rs
+        working-directory: rs/scripts
+        run: |
+          ok=0
+          for i in 1 2 3 4 5 6; do
+            out=$(python -u market_data.py --max-seconds 900 2>&1 | tail -8); echo "$out"
+            if echo "$out" | grep -q '"complete": true'; then ok=1; break; fi
+            echo "第 $i 次未完成，2 分鐘後重試"; sleep 120
+          done
+          [ "$ok" = 1 ] || echo "::warning::RS 資料更新未完成，改用既有快取輸出"
+          python export_web.py --cached 2>&1 | tail -3
+          cp ../web/data.json ../../site/data.json
+
+      - name: 型態篩選與抗跌股
+        id: screener
+        continue-on-error: true
+        working-directory: screener
+        run: |
+          set -o pipefail
+          python tw_momentum_screener.py --no-cache 2>&1 | tee run.log | tail -40
+          cp output/site/screener.json ../site/screener.json
+          [ -f output/site/pullback.json ] && cp output/site/pullback.json ../site/pullback.json || true
+
+      - name: 處置股
+        id: disposal
+        continue-on-error: true
+        working-directory: screener
+        run: |
+          python disposal.py ../site/disposal.json || { sleep 60; python disposal.py ../site/disposal.json; }
+
+      - name: 寫入狀態檔
+        if: always()
+        run: |
+          python - <<'PY'
+          import json, os, datetime as dt
+          def asof(f):
+              try: return json.load(open(f, encoding="utf-8")).get("as_of")
+              except Exception: return None
+          log = open("screener/run.log", encoding="utf-8").read().splitlines() if os.path.exists("screener/run.log") else []
+          st = {
+            "run_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
+            "steps": {"rs": "${{ steps.rs.outcome }}", "screener": "${{ steps.screener.outcome }}", "disposal": "${{ steps.disposal.outcome }}"},
+            "as_of": {k: asof(f"site/{k}.json") for k in ["data", "screener", "pullback", "disposal"]},
+            "pullback_error": next((l for l in log if "[抗跌股] 失敗" in l), None),
+            "screener_log_tail": log[-10:],
+          }
+          json.dump(st, open("site/status.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+          print(json.dumps(st, ensure_ascii=False, indent=1))
+          PY
+
+      - name: 存回 repo
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A site rs/web rs/scripts/.cache screener/cache
+          git diff --cached --quiet && { echo "沒有變更"; exit 0; }
+          git commit -q -m "每日更新 $(date +%F)"
+          for i in 1 2 3; do git push && break; git pull --rebase -q; done

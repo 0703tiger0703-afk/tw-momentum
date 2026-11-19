@@ -1,0 +1,1130 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}
+/* ===== iPhone 股市風格 ===== */
+:root:not([data-x]) {
+  --bg: #f2f2f7; --panel: #ffffff; --ink: #000000; --muted: #6e6e73; --faint: #a1a1a6; --line: #e5e5ea; --line-strong: #c6c6c8;
+  --accent: #007aff; --accent-soft: #e5f0ff; --up: #ff3b30; --up-soft: #ffe5e3; --down: #34c759; --down-soft: #e3f7e8;
+  --warn: #ff9500; --warn-soft: #fff2df; --hl: #fff7d6; --r: 12px;
+  --seg: #e3e3e8; --seg-on: #ffffff; --sep: #c6c6c8; --chip: #f2f2f7; --off: #c7c7cc; --hdr: rgba(242,242,247,.92);
+  --font-display: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", sans-serif;
+  --font-num: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-x]) {
+    --bg: #000000; --panel: #1c1c1e; --ink: #ffffff; --muted: #98989f; --faint: #6c6c70; --line: #2c2c2e; --line-strong: #38383a;
+    --accent: #0a84ff; --accent-soft: #10284a; --up: #ff453a; --up-soft: #3a1513; --down: #30d158; --down-soft: #0f2e18;
+    --warn: #ff9f0a; --warn-soft: #3a2a0c; --hl: #3a3410;
+    --seg: #2c2c2e; --seg-on: #636366; --sep: #38383a; --chip: #2c2c2e; --off: #545458; --hdr: rgba(0,0,0,.85);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]:not([data-x]) {
+  --bg: #000000; --panel: #1c1c1e; --ink: #ffffff; --muted: #98989f; --faint: #6c6c70; --line: #2c2c2e; --line-strong: #38383a;
+  --accent: #0a84ff; --accent-soft: #10284a; --up: #ff453a; --up-soft: #3a1513; --down: #30d158; --down-soft: #0f2e18;
+  --warn: #ff9f0a; --warn-soft: #3a2a0c; --hl: #3a3410;
+  --seg: #2c2c2e; --seg-on: #636366; --sep: #38383a; --chip: #2c2c2e; --off: #545458; --hdr: rgba(0,0,0,.85);
+  color-scheme: dark;
+}
+html header.top { background: var(--hdr); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-bottom: .5px solid var(--sep); }
+html body::before { background: var(--hdr); }
+html .brand h1 { font-size: 30px; font-weight: 700; letter-spacing: -.01em; }
+html nav.tabs { background: var(--seg); border-radius: 9px; padding: 2px; gap: 0; width: fit-content; }
+html .tab { border: 0; border-radius: 7px; color: var(--ink); font-weight: 500; padding: 5px 14px; }
+html .tab[aria-selected="true"] { background: var(--seg-on); border: 0; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+html .search input { background: var(--seg); border: 0; border-radius: 10px; }
+html .btn { border-radius: 10px; color: #fff; }
+html section.panel { border: 0; }
+html h2 { font-weight: 700; font-size: 20px; font-family: var(--font-display); }
+html .subtabs { background: var(--seg); border-radius: 9px; padding: 2px; gap: 0; width: fit-content; max-width: 100%; }
+html .stab { border: 0; border-radius: 7px; background: none; padding: 5px 12px; color: var(--ink); }
+html .stab[aria-pressed="true"] { background: var(--seg-on); color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+html .slider { margin: 12px 0 0; display: flex; max-width: 320px; }
+html .slider input { flex: 1; accent-color: var(--accent); }
+html .note { border-left: 0; border-radius: 10px; }
+html .scard { border: 0; border-radius: 12px; }
+html .scard .hd { padding: 16px 16px 10px; }
+html .scard .nm { font-weight: 700; font-size: 22px; }
+html .scard .bn { color: var(--ink); font-weight: 600; font-size: 22px; }
+html .scard > .row, html .scard > .kv3 { margin-left: 16px; padding: 9px 16px 9px 0; border-top: .5px solid var(--sep); }
+html .lbl { color: var(--ink); font-size: 15px; min-width: 44px; }
+html .rq { font-size: 14px; color: var(--muted); }
+html .bx { border: 0; background: none; padding: 0 10px 0 0; font-size: 14px; color: var(--off); border-radius: 0; }
+html .bx.y { background: none; color: var(--accent); font-weight: 600; }
+html .bx.na { color: var(--off); }
+html .ptag { border: 0; background: var(--chip); border-radius: 6px; }
+html .ptag.br { background: var(--up); color: #fff; }
+html .ptag.ipo { border: 0; }
+html .scard img { border-top: 0; padding: 0 8px 8px; background: var(--panel); }
+html .scard img, html .spanel img { border-radius: 8px; }
+html .guide section { border: 0; border-radius: 12px; }
+html .gcard, html .metrics, html .tblwrap, html .outs { border-color: var(--sep); }
+html .rs90, html .stab[aria-pressed="true"].x { color: #fff; }
+html .chip, html .tag { border-color: var(--sep); }
+html .inbox { border: 0; background: var(--seg); border-radius: 10px; }
+html .from { border-radius: 10px; }
+html th { background: var(--panel); }
+
+
+/* ---------- 抗跌股 ---------- */
+.pbsum { font-size: 15px; margin: 4px 0 0; line-height: 1.7; }
+.pbsum b.dn { color: var(--down); }
+.pbfil { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 12px; }
+.pbfil label { font-size: 14px; color: var(--muted); display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.pbfil input { accent-color: var(--accent); width: 16px; height: 16px; }
+.pbl { list-style: none; margin: 0; padding: 0; }
+.pbl li { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: .5px solid var(--sep); }
+.pbl li:first-child { border-top: 0; }
+.pbl .rk { width: 26px; text-align: right; color: var(--faint); font-family: var(--font-num); font-size: 13px; flex: none; }
+.pbl .who { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 0; color: var(--ink); font: inherit; cursor: pointer; }
+.pbl .who b { font-size: 16px; }
+.pbl .who .num { color: var(--muted); margin-left: 6px; }
+.pbl .who .s { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.pbl .who:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pbl .pct { text-align: right; flex: none; }
+.pbl .pct .v { font-family: var(--font-num); font-size: 19px; font-weight: 600; display: block; }
+.pbl .pct .x { font-size: 12.5px; color: var(--muted); }
+.dots { letter-spacing: 1px; }
+.dots i { font-style: normal; }
+.dots i.on { color: var(--accent); }
+.dots i.off { color: var(--off); }
+.pbtag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 2px; }
+.pbtag.nh { background: var(--up-soft); color: var(--up); }
+.pbtag.s3 { background: var(--accent-soft); color: var(--accent); }
+.pbmore { margin-top: 12px; }
+/* ---------- 處置股 ---------- */
+.dform { display: flex; gap: 8px; }
+.dform .inbox { flex: 1; min-width: 0; }
+.dhd { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+.dhd .nm { font-family: var(--font-display); font-weight: 700; font-size: 26px; }
+.dhd .cd { font-family: var(--font-num); color: var(--muted); font-size: 17px; }
+.dstat { display: inline-flex; align-items: center; font-weight: 700; font-size: 14px; padding: 4px 11px; border-radius: 999px; white-space: nowrap; }
+.dstat.bad { background: var(--up); color: #fff; }
+.dstat.warn { background: var(--warn); color: #fff; }
+.dstat.note { background: var(--warn-soft); color: var(--warn); }
+.dstat.mute { background: var(--chip); color: var(--muted); }
+.dstat.good { background: var(--down-soft); color: var(--down); }
+.dsub { font-size: 15px; margin: 8px 0 0; }
+.dcnt { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+@media (max-width: 640px) { .dcnt { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.dc { background: var(--bg); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.dc .k { font-size: 13px; color: var(--muted); }
+.dc .v { font-family: var(--font-num); font-size: 24px; font-weight: 600; }
+.dc .v small { font-size: 14px; color: var(--muted); font-weight: 400; }
+.dc .bar { height: 5px; border-radius: 3px; background: var(--seg); margin: 6px 0 4px; overflow: hidden; }
+.dc .bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.dc.hot .bar i { background: var(--warn); }
+.dc.hot .v { color: var(--warn); }
+.dc .s { font-size: 12.5px; color: var(--muted); }
+.dbox { background: var(--up-soft); border-radius: 10px; padding: 12px 14px; margin-top: 14px; font-size: 14px; line-height: 1.7; }
+.dbox b { color: var(--up); }
+.dnl { list-style: none; margin: 0; padding: 0; }
+.dnl li { padding: 9px 0; border-top: .5px solid var(--sep); }
+.dnl .h { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; font-size: 14px; }
+.dnl .h .t { margin-left: auto; font-size: 12.5px; color: var(--accent); }
+.dnl .x { font-size: 13px; color: var(--muted); margin-top: 2px; line-height: 1.6; }
+.dnl li.off .h, .dnl li.off .x { color: var(--faint); }
+.dnl li.off .t { color: var(--faint); }
+.hlist { margin: 0; padding: 0; list-style: none; }
+.hlist li { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-top: .5px solid var(--sep); }
+.hlist li:first-child { border-top: 0; }
+.hlist .who { flex: 1; min-width: 0; text-align: left; background: none; border: 0; padding: 0; color: var(--ink); font: inherit; cursor: pointer; }
+.hlist .who b { font-size: 16px; }
+.hlist .who .num { color: var(--muted); margin-left: 6px; }
+.hlist .who span.s { display: block; font-size: 13px; color: var(--muted); margin-top: 2px; }
+.hlist .rm { background: none; border: 0; color: var(--faint); font-size: 20px; line-height: 1; padding: 4px 6px; cursor: pointer; border-radius: 6px; }
+.hlist .rm:hover { color: var(--up); }
+.hlist .who:focus-visible, .hlist .rm:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.dmeta { font-size: 12.5px; color: var(--muted); margin: 10px 0 0; }
+</style></head><body>
+<title>台股動能交易工具</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;800&display=swap">
+<style>
+/* Layout: 交易終端式單欄工作區 — 頂部查詢列 → 個股摘要 → 族群強度 → 族群內排名 → 判讀；另有兩個排行榜分頁 */
+:root {
+  --bg: #f3f4f1;
+  --panel: #ffffff;
+  --ink: #16191d;
+  --muted: #5d636b;
+  --faint: #8c929a;
+  --line: #dfe1dc;
+  --line-strong: #c4c8c1;
+  --accent: #1f4fa8;          /* 墨藍：非漲跌語意 */
+  --accent-soft: #e6ecf7;
+  --up: #c8232c;              /* 台股慣例：紅漲 */
+  --up-soft: #fbe9ea;
+  --down: #13804a;            /* 綠跌 */
+  --down-soft: #e5f3eb;
+  --warn: #a8640a;
+  --warn-soft: #fbf0dc;
+  --hl: #fff7d6;
+  --font-display: "Noto Serif TC", "Songti TC", "PMingLiU", serif;
+  --font-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", system-ui, sans-serif;
+  --font-num: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 6px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111316; --panel: #191c20; --ink: #e8eae6; --muted: #a2a8af; --faint: #737a82;
+    --line: #2a2e33; --line-strong: #3a3f45; --accent: #7fa6ef; --accent-soft: #1d2a41;
+    --up: #f0636b; --up-soft: #3a1c1f; --down: #4cc187; --down-soft: #15301f;
+    --warn: #e6a64a; --warn-soft: #3a2b12; --hl: #2f2a14; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111316; --panel: #191c20; --ink: #e8eae6; --muted: #a2a8af; --faint: #737a82;
+  --line: #2a2e33; --line-strong: #3a3f45; --accent: #7fa6ef; --accent-soft: #1d2a41;
+  --up: #f0636b; --up-soft: #3a1c1f; --down: #4cc187; --down-soft: #15301f;
+  --warn: #e6a64a; --warn-soft: #3a2b12; --hl: #2f2a14; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 15px; line-height: 1.55;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--panel); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+/* ---------- 頂部 ---------- */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--panel); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding-block: 12px; }
+.brand { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; min-width: 0; }
+.brand h1 { font-family: var(--font-display); font-weight: 800; font-size: 19px; margin: 0; letter-spacing: .02em; white-space: nowrap; }
+.brand .asof { font-size: 12px; color: var(--muted); }
+.search { flex: 1 1 320px; display: flex; gap: 8px; position: relative; min-width: 0; }
+.search input {
+  flex: 1; min-width: 0; font: 500 16px var(--font-num); padding: 9px 12px; border: 1px solid var(--line-strong);
+  border-radius: var(--r); background: var(--bg); color: var(--ink);
+}
+.search input:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+.btn { font: 500 14px var(--font-body); padding: 8px 14px; border-radius: var(--r); border: 1px solid var(--accent); background: var(--accent); color: var(--panel); cursor: pointer; white-space: nowrap; }
+.btn:focus-visible, .tab:focus-visible, .chip:focus-visible, tr.click:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.sugg { position: absolute; top: calc(100% + 4px); left: 0; right: 0; background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--r); box-shadow: 0 8px 24px rgba(0,0,0,.12); max-height: 320px; overflow: auto; z-index: 6; }
+.sugg button { display: flex; width: 100%; gap: 12px; padding: 8px 12px; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--ink); text-align: left; cursor: pointer; font: 14px var(--font-body); }
+.sugg button:hover, .sugg button.on { background: var(--accent-soft); }
+.sugg .c { font-family: var(--font-num); width: 44px; }
+.sugg .i { color: var(--muted); margin-left: auto; font-size: 12px; }
+nav.tabs { display: flex; gap: 4px; overflow-x: auto; max-width: 100%; }
+.tab { font: 500 14px var(--font-body); padding: 7px 12px; border-radius: var(--r); border: 1px solid transparent; background: none; color: var(--muted); cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { color: var(--ink); background: var(--bg); border-color: var(--line); }
+
+main { padding-block: 20px 48px; display: grid; gap: 18px; }
+section.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px 20px; min-width: 0; }
+h2 { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 0 0 12px; text-wrap: balance; }
+h2 small { font-family: var(--font-body); font-weight: 400; font-size: 13px; color: var(--muted); margin-left: 8px; }
+.eyebrow { font-size: 11px; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
+.muted { color: var(--muted); }
+
+/* ---------- 個股摘要 ---------- */
+.hero { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 20px; }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr; } }
+.idline { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.idline .name { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.2; }
+.idline .code { font-family: var(--font-num); font-size: 20px; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); white-space: nowrap; }
+.tag.link { cursor: pointer; background: none; font-family: var(--font-body); }
+.tag.link:hover { border-color: var(--accent); color: var(--accent); }
+.rsrow { display: flex; align-items: flex-end; gap: 18px; margin-top: 16px; flex-wrap: wrap; }
+.rsbig { font-family: var(--font-num); font-weight: 600; font-size: 64px; line-height: .9; letter-spacing: -.02em; }
+.rsmeta { display: grid; gap: 4px; padding-bottom: 4px; }
+.level { font-weight: 700; font-size: 15px; }
+.rsbar { position: relative; height: 8px; width: 220px; max-width: 60vw; border-radius: 4px; background: linear-gradient(90deg, var(--line) 0 50%, var(--accent-soft) 50% 80%, var(--accent-soft) 80% 100%); }
+.rsbar i { position: absolute; top: -4px; width: 3px; height: 16px; background: var(--ink); border-radius: 2px; }
+.rsbar b { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line-strong); }
+.notes { display: grid; gap: 6px; margin-top: 14px; }
+.note { font-size: 13.5px; padding: 7px 10px; border-radius: var(--r); border-left: 3px solid var(--accent); background: var(--accent-soft); }
+.note.bad { border-color: var(--up); background: var(--up-soft); }
+.note.warn { border-color: var(--warn); background: var(--warn-soft); }
+.note.good { border-color: var(--down); background: var(--down-soft); }
+.spark { width: 100%; height: 120px; display: block; margin-top: 4px; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(108px, 1fr)); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; margin-top: 16px; }
+.metric { background: var(--panel); padding: 10px 12px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.metric .k { font-size: 12px; color: var(--muted); }
+.metric .v { font-family: var(--font-num); font-size: 18px; font-weight: 500; }
+.up { color: var(--up); } .down { color: var(--down); }
+.tt { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+.tt span { font-size: 12px; padding: 2px 7px; border-radius: 4px; background: var(--bg); color: var(--faint); text-decoration: line-through; }
+.tt span.ok { background: var(--accent-soft); color: var(--ink); text-decoration: none; }
+
+/* ---------- 族群卡 ---------- */
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.gcard { border: 1px solid var(--line); border-radius: var(--r); padding: 12px 14px; display: grid; gap: 8px; background: var(--panel); text-align: left; color: var(--ink); font: inherit; cursor: pointer; }
+.gcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.gcard .gt { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.gcard .gn { font-weight: 700; }
+.gcard .gk { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.g3 div { min-width: 0; }
+.g3 .k { font-size: 11px; color: var(--muted); }
+.g3 .v { font-family: var(--font-num); font-size: 17px; font-weight: 500; }
+.pill { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 999px; width: fit-content; }
+.pill.true { background: var(--up-soft); color: var(--up); }
+.pill.fake { background: var(--down-soft); color: var(--down); }
+.pill.mid { background: var(--warn-soft); color: var(--warn); }
+.pill.none { background: var(--bg); color: var(--muted); }
+.pass { font-size: 11px; color: var(--faint); }
+
+/* ---------- 表格 ---------- */
+.tblwrap { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+th, td { padding: 7px 10px; text-align: right; white-space: nowrap; border-bottom: 1px solid var(--line); }
+th { font-weight: 500; font-size: 12px; color: var(--muted); background: var(--bg); position: sticky; top: 0; }
+td.l, th.l { text-align: left; }
+td { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+td.l { font-family: var(--font-body); }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: var(--accent-soft); }
+tr.me td { background: var(--hl); font-weight: 600; }
+tbody tr:last-child td { border-bottom: 0; }
+.rsc { display: inline-block; min-width: 30px; padding: 0 4px; border-radius: 3px; text-align: center; }
+.rs90 { background: var(--up); color: var(--panel); }
+.rs80 { background: var(--up-soft); color: var(--up); }
+.rs50 { background: var(--bg); }
+.rslo { color: var(--down); }
+.dim { color: var(--faint); }
+.flag { font-family: var(--font-body); font-size: 11px; padding: 1px 6px; border-radius: 3px; margin-left: 4px; }
+.flag.bad { background: var(--up-soft); color: var(--up); }
+.flag.warn { background: var(--warn-soft); color: var(--warn); }
+.flag.good { background: var(--down-soft); color: var(--down); }
+
+.leader { display: grid; gap: 8px; }
+.lrow { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 10px; font-size: 14px; padding: 8px 0; border-bottom: 1px dashed var(--line); }
+.lrow:last-child { border-bottom: 0; }
+.lrow .who { font-weight: 700; }
+.lrow .who .num { font-weight: 400; color: var(--muted); font-size: 12px; display: block; }
+.verdict-big { font-size: 15px; padding: 10px 12px; background: var(--bg); border-radius: var(--r); }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; }
+@media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--font-num); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
+.chip span { font-family: var(--font-body); color: var(--muted); margin-left: 4px; }
+.empty { padding: 28px 8px; text-align: center; color: var(--muted); }
+.legend { font-size: 12.5px; color: var(--muted); display: grid; gap: 4px; }
+footer { font-size: 12.5px; color: var(--muted); padding-block: 0 40px; display: grid; gap: 6px; }
+footer p { margin: 0; max-width: 75ch; }
+.loading { padding: 60px 0; text-align: center; color: var(--muted); }
+@media (max-width: 520px) {
+  .rsbig { font-size: 52px; }
+  .idline .name { font-size: 25px; }
+  section.panel { padding: 14px; }
+  .lrow { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* ---------- 篩選清單 ---------- */
+.subtabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.stab { font: 500 14px var(--font-body); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line-strong); background: var(--panel); color: var(--ink); cursor: pointer; }
+.stab[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.stab .num { margin-left: 4px; }
+.slider { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(500px, 100%), 1fr)); gap: 14px; }
+.scard { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; min-width: 0; display: flex; flex-direction: column; }
+.scard .hd { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; padding: 14px 16px 6px; }
+.scard .nm { font-family: var(--font-display); font-weight: 800; font-size: 20px; }
+.scard .cd { font-family: var(--font-num); color: var(--muted); }
+.scard .ind { font-size: 12px; color: var(--muted); }
+.scard .bn { margin-left: auto; font-family: var(--font-num); font-weight: 600; font-size: 26px; color: var(--accent); white-space: nowrap; }
+.scard .bn small { font-size: 12px; color: var(--muted); font-weight: 400; margin: 0 2px; }
+.row { display: flex; flex-wrap: wrap; gap: 6px; padding: 4px 16px; align-items: center; }
+.lbl { font-size: 12px; color: var(--muted); }
+.ptag { font-size: 12px; padding: 2px 8px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); }
+.ptag.br { background: var(--up); border-color: var(--up); color: var(--panel); }
+.ptag.ipo { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+.rq { font-size: 12.5px; }
+.bx { font-size: 12.5px; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--muted); }
+.bx.y { background: var(--accent); border-color: var(--accent); color: var(--panel); }
+.bx.na { border-style: dashed; }
+.kv3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 8px 16px 10px; }
+.kv3 .k { font-size: 11.5px; color: var(--muted); }
+.kv3 .v { font-family: var(--font-num); font-size: 15px; }
+.kv3 .v.t { font-family: var(--font-body); font-size: 13.5px; }
+.scard img { width: 100%; display: block; border-top: 1px solid var(--line); background: #fff; cursor: zoom-in; margin-top: auto; }
+.linkbtn { font: 500 12.5px var(--font-body); color: var(--accent); background: none; border: 0; cursor: pointer; padding: 0; margin-left: auto; }
+.zoom { position: fixed; inset: 0; background: rgba(0,0,0,.85); display: flex; align-items: center; justify-content: center; z-index: 20; cursor: zoom-out; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+.zoom img { max-width: 96vw; max-height: 94vh; }
+.guide { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px; }
+.guide section { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 12px 16px; min-width: 0; }
+.guide h3 { font-family: var(--font-display); font-size: 14px; color: var(--ink); margin: 0 0 6px; }
+.guide ul, .guide ol { margin: 0; padding-left: 20px; line-height: 1.75; font-size: 13px; }
+.guide ul { list-style: none; padding-left: 0; }
+.guide b { color: var(--ink); font-weight: 600; }
+.tvb { display: grid; gap: 6px; padding: 12px 0; border-bottom: 1px dashed var(--line); }
+.tvb:last-child { border-bottom: 0; }
+.tvh { display: flex; align-items: center; gap: 8px; }
+.tvh .btn { margin-left: auto; padding: 5px 12px; font-size: 13px; }
+textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(--line); border-radius: var(--r); padding: 8px; background: var(--bg); color: var(--ink); resize: vertical; }
+.spanel h3 { font-family: var(--font-display); font-size: 15px; margin: 0 0 8px; }
+.spanel .sflex { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 16px; align-items: start; }
+@media (max-width: 760px) { .spanel .sflex { grid-template-columns: 1fr; } .kv3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.spanel img { width: 100%; border: 1px solid var(--line); border-radius: var(--r); background: #fff; cursor: zoom-in; }
+.linkbtn + .linkbtn { margin-left: 14px; }
+/* ---------- 停損／張數 ---------- */
+.calcs { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 14px; }
+.calc { display: grid; gap: 14px; align-content: start; }
+.fld { display: grid; gap: 6px; }
+.fld > span { font-size: 13px; color: var(--muted); display: flex; justify-content: space-between; align-items: baseline; }
+.fld > span b { font-family: var(--font-num); font-size: 15px; color: var(--ink); }
+.inbox { display: flex; align-items: center; border: 1px solid var(--line-strong); border-radius: var(--r); background: var(--bg); }
+.inbox:focus-within { outline: 2px solid var(--accent); outline-offset: 1px; }
+.inbox input { flex: 1; min-width: 0; border: 0; background: none; font: 500 18px var(--font-num); padding: 9px 12px; color: var(--ink); outline: none; }
+.inbox i { font-style: normal; color: var(--muted); padding-right: 12px; font-size: 14px; }
+.fld input[type=range] { width: 100%; accent-color: var(--accent); }
+.outs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+.outs.one { grid-template-columns: 1fr; }
+.out { padding: 12px 14px; min-width: 0; box-shadow: 1px 0 0 var(--line), 0 1px 0 var(--line); }
+.out .k { font-size: 12.5px; color: var(--muted); }
+.out .v { font-family: var(--font-num); font-weight: 600; font-size: 28px; line-height: 1.25; }
+.out .v small { font-size: 14px; font-weight: 400; color: var(--muted); margin-left: 3px; }
+.out .s { font-size: 12.5px; color: var(--muted); }
+.from { font-size: 13.5px; padding: 8px 12px; border-radius: var(--r); background: var(--accent-soft); display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center; }
+.from .linkbtn { margin-left: auto; }
+
+@media (prefers-reduced-motion: no-preference) { .gcard, .tab, .chip { transition: border-color .15s, background .15s; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <div class="brand"><h1>台股動能交易工具</h1><span class="asof num" id="asof">資料載入中…</span></div>
+    <form class="search" id="form" autocomplete="off" role="search">
+      <input id="q" type="search" inputmode="search" placeholder="輸入代號或名稱，例如 2330、欣興" aria-label="股票代號或名稱">
+      <button class="btn" type="submit">查詢</button>
+      <div class="sugg" id="sugg" hidden></div>
+    </form>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tab-screen" aria-selected="true" data-view="screen">篩選清單</button>
+      <button class="tab" role="tab" id="tab-stock" aria-selected="false" data-view="stock">RS</button>
+      <button class="tab" role="tab" id="tab-themes" aria-selected="false" data-view="themes">細分族群</button>
+      <button class="tab" role="tab" id="tab-pb" aria-selected="false" data-view="pb">抗跌股</button>
+      <button class="tab" role="tab" id="tab-tv" aria-selected="false" data-view="tv">TradingView</button>
+      <button class="tab" role="tab" id="tab-disp" aria-selected="false" data-view="disp">處置股</button>
+      <button class="tab" role="tab" id="tab-calc" aria-selected="false" data-view="calc">停損／張數</button>
+    </nav>
+  </div>
+</header>
+
+<div class="wrap">
+  <main id="main"><div class="loading">正在載入全市場資料…</div></main>
+  <footer>
+    <p><b>計算方式</b>　RS = 近 3 月報酬 ×40% ＋ 6 月 ×30% ＋ 9 月 ×20% ＋ 12 月 ×10%（還原股價，交易日回推 63／126／189／252 天），在全市場上市櫃普通股中排百分位 1–99；排除興櫃、ETF、ETN、存託憑證。強勢族群門檻：中位數 RS ≥ 70 且 RS≥80 佔比 ≥ 30%，再以近 3 月中位數報酬判斷真假強勢。</p>
+    <p><b>資料來源</b>　證交所、櫃買中心每日收盤行情與除權息／減資計算結果表；FinMind 產業分類與面額變更資料。<span id="adjinfo"></span></p>
+    <p><b>型態篩選</b>　價格來自 Yahoo Finance 還原日線（你 Mac 上的篩選程式每個交易日收盤後執行）；RS、族群與領導股判定來自 RS 分頁的資料。</p>
+    <p>本頁是型態辨識與價格動能的輔助工具，不是買賣建議。型態仍須自行看圖確認。顏色依台股慣例：紅漲綠跌。</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const TT_LABELS = ["站上 150/200MA", "150MA > 200MA", "200MA 上揚", "50MA > 150/200MA", "站上 50MA", "距 52 週低 +30%", "距 52 週高 25% 內"];
+  let D = null, view = "stock", current = null, activeGroup = null;
+  const $ = (s, el = document) => el.querySelector(s);
+  const main = $("#main");
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const f1 = x => x == null ? "—" : (x > 0 ? "+" : "") + x.toFixed(1) + "%";
+  const cls = x => x == null ? "dim" : x > 0 ? "up" : x < 0 ? "down" : "";
+  const fint = x => x == null ? "—" : x.toLocaleString("zh-TW");
+  const rsCls = r => r >= 90 ? "rs90" : r >= 80 ? "rs80" : r >= 50 ? "rs50" : "rslo";
+  const level = r => r >= 90 ? "非常強勢・前 10%" : r >= 80 ? "強勢・前 20%" : r >= 70 ? "中等偏強・前 30%" : r >= 50 ? "中等・前 50%" : "弱於市場平均";
+  const median = a => { const s = [...a].sort((x, y) => x - y), n = s.length; return n ? (n % 2 ? s[(n - 1) / 2] : (s[n / 2 - 1] + s[n / 2]) / 2) : null; };
+
+  function groupStats(codes) {
+    const g = codes.map(c => D.stocks[c]).filter(Boolean);
+    if (!g.length) return null;
+    const med = median(g.map(s => s.rs)), pct = Math.round(g.filter(s => s.rs >= 80).length / g.length * 1000) / 10;
+    const r3 = g.map(s => s.r[0]).filter(x => x != null), m3 = r3.length ? median(r3) : null;
+    const strong = med >= D.thresholds.median_rs && pct >= D.thresholds.pct80;
+    let verdict, kind;
+    if (strong && m3 > 0) { verdict = "真族群行情"; kind = "true"; }
+    else if (strong && m3 <= -10) { verdict = "假強勢：整群修正中，高 RS 是歷史遺產"; kind = "fake"; }
+    else if (strong) { verdict = "強勢但近期動能轉弱"; kind = "mid"; }
+    else if (pct >= D.thresholds.pct80) { verdict = "族群分化：個股行情"; kind = "mid"; }
+    else if (g.some(s => s.rs >= 95)) { verdict = "個股獨走"; kind = "mid"; }
+    else { verdict = "非強勢族群"; kind = "none"; }
+    return { count: g.length, med, pct, m3, strong, verdict, kind };
+  }
+  const sortRaw = codes => codes.filter(c => D.stocks[c]).sort((a, b) => D.stocks[b].raw - D.stocks[a].raw);
+  const indCodes = ind => Object.keys(D.stocks).filter(c => D.stocks[c].i === ind);
+
+  function memberFlags(s) {
+    const out = [];
+    if (s.rs >= 80 && s.tt >= 6 && s.oh >= -15) out.push(["good", "真強勢"]);
+    if (s.rs >= 80 && s.tt <= 5 && s.oh <= -30) out.push(["bad", "排名假象"]);
+    if (s.v20 != null && s.v20 < 50) out.push(["warn", "流動性不足"]);
+    return out;
+  }
+
+  function sparkSVG(s) {
+    const v = (s.sp || []).filter(x => x != null);
+    if (v.length < 2) return '<p class="muted">走勢資料不足</p>';
+    const W = 520, H = 120, pl = 4, pr = 54, pt = 10, pb = 18;
+    const lo = Math.min(...v), hi = Math.max(...v), span = hi - lo || 1;
+    const x = i => pl + i / (v.length - 1) * (W - pl - pr), y = val => pt + (1 - (val - lo) / span) * (H - pt - pb);
+    const pts = v.map((val, i) => `${x(i).toFixed(1)},${y(val).toFixed(1)}`).join(" ");
+    const last = v[v.length - 1], first = v[0];
+    const col = last >= first ? "var(--up)" : "var(--down)";
+    const area = `${pl},${H - pb} ${pts} ${x(v.length - 1).toFixed(1)},${H - pb}`;
+    const dates = D.spark_dates;
+    return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="近 52 週還原收盤走勢">
+      <line x1="${pl}" x2="${W - pr}" y1="${y(hi)}" y2="${y(hi)}" stroke="var(--line-strong)" stroke-dasharray="3 3"/>
+      <line x1="${pl}" x2="${W - pr}" y1="${y(lo)}" y2="${y(lo)}" stroke="var(--line-strong)" stroke-dasharray="3 3"/>
+      <polygon points="${area}" fill="${col}" opacity=".08"/>
+      <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke"/>
+      <circle cx="${x(v.length - 1)}" cy="${y(last)}" r="3" fill="${col}"/>
+      <text x="${W - pr + 6}" y="${y(hi) + 4}" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${hi.toFixed(hi < 100 ? 2 : 0)}</text>
+      <text x="${W - pr + 6}" y="${y(lo) + 4}" font-size="11" fill="var(--muted)" font-family="IBM Plex Mono, monospace">${lo.toFixed(lo < 100 ? 2 : 0)}</text>
+      <text x="${pl}" y="${H - 3}" font-size="10" fill="var(--faint)" font-family="IBM Plex Mono, monospace">${dates[0] || ""}</text>
+      <text x="${W - pr}" y="${H - 3}" font-size="10" fill="var(--faint)" text-anchor="end" font-family="IBM Plex Mono, monospace">${dates[dates.length - 1] || ""}</text>
+    </svg>`;
+  }
+
+  function memberTable(codes, me, full) {
+    const ranks = full || codes;
+    const rows = codes.map(c => {
+      const s = D.stocks[c];
+      const fl = memberFlags(s).map(([k, t]) => `<span class="flag ${k}">${t}</span>`).join("");
+      return `<tr class="click${c === me ? " me" : ""}" tabindex="0" data-code="${c}">
+        <td>${ranks.indexOf(c) + 1}</td><td class="l"><span class="num">${c}</span> ${esc(s.n)}${fl}</td>
+        <td><span class="rsc ${rsCls(s.rs)}">${s.rs}</span></td>
+        <td class="${cls(s.r[0])}">${f1(s.r[0])}</td>
+        <td>${s.tt >= 0 ? s.tt + "/7" : "?"}</td>
+        <td class="${s.oh <= -30 ? "down" : ""}">${s.oh == null ? "—" : s.oh.toFixed(1) + "%"}</td>
+        <td>${fint(s.cap)}</td>
+        <td class="${s.v20 != null && s.v20 < 50 ? "dim" : ""}">${fint(s.v20)}</td></tr>`;
+    }).join("");
+    return `<div class="tblwrap"><table><thead><tr><th>名次</th><th class="l">股票</th><th>RS</th><th>近 3 月</th><th>模板</th><th>距 52 週高</th><th>市值(億)</th><th>日均值(百萬)</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+
+  function leaderBlock(codes, me) {
+    const n = codes.length, rank = codes.indexOf(me) + 1, s = D.stocks[me];
+    const firstTier = rank <= Math.max(3, Math.round(n * .03)) && s.rs >= 90;
+    const stronger = codes.slice(0, rank - 1).slice(0, 5);
+    const judge = c => {
+      const t = D.stocks[c];
+      if (t.rs >= 80 && t.tt <= 5 && t.oh <= -30) return `排名靠過去漲幅撐著：模板 ${t.tt}/7、距高點 ${t.oh.toFixed(1)}%，不是更好的選擇。`;
+      if (t.v20 != null && t.v20 < 50) return `形態${t.tt >= 6 ? "不錯" : "普通"}，但日均成交值只有 ${t.v20} 百萬，實務上難以進出。`;
+      if (t.tt >= 6 && t.oh >= -25) return `真正的對手：模板 ${t.tt}/7、距高點 ${t.oh.toFixed(1)}%、近 3 月 ${f1(t.r[0])}，日均值 ${fint(t.v20)} 百萬。`;
+      if (t.r[0] != null && t.r[0] < -10) return `近 3 月 ${f1(t.r[0])}，動能已轉弱，名次是歷史累積。`;
+      return `模板 ${t.tt}/7、距高點 ${t.oh == null ? "—" : t.oh.toFixed(1) + "%"}，需看圖確認。`;
+    };
+    const head = `<div class="verdict-big">族群內第 <b class="num">${rank}</b> / ${n} 名・${firstTier ? "<b>第一梯隊（領導股）</b>" : rank <= Math.ceil(n * .2) ? "前段班，但不是第一梯隊" : "非領導股"}</div>`;
+    const list = stronger.length ? stronger.map(c => `<div class="lrow"><div class="who">${esc(D.stocks[c].n)}<span class="num">${c}・RS ${D.stocks[c].rs}</span></div><div>${judge(c)}</div></div>`).join("")
+      : `<p class="muted" style="margin:0">族群內沒有排名更前的股票。</p>`;
+    return `<div class="leader">${head}<div class="eyebrow" style="margin-top:6px">排名更前的成員</div>${list}</div>`;
+  }
+
+  function groupsFor(code) {
+    const s = D.stocks[code];
+    const gs = [];
+    const indRank = D.industries.find(x => x.industry === s.i);
+    gs.push({ key: "ind:" + s.i, name: s.i, kind: "官方產業", codes: sortRaw(indCodes(s.i)), rank: indRank ? `${indRank.rank}/${D.industries.length}` : "樣本不足未排名" });
+    for (const [t, cs] of Object.entries(D.theme_def)) {
+      if (cs.includes(code)) {
+        const tr = D.themes.find(x => x.theme === t);
+        gs.push({ key: "th:" + t, name: t, kind: "細分族群", codes: sortRaw(cs), rank: tr ? `${tr.rank}/${D.themes.length}` : "—" });
+      }
+    }
+    return gs;
+  }
+
+  function gcard(g, pressed) {
+    const st = groupStats(g.codes);
+    const pass = st.strong ? "兩項門檻皆通過" : (st.med >= D.thresholds.median_rs ? "只過中位數門檻" : st.pct >= D.thresholds.pct80 ? "只過佔比門檻" : "門檻未通過");
+    return `<button class="gcard" aria-pressed="${pressed}" data-g="${esc(g.key)}">
+      <div class="gt"><span class="gn">${esc(g.name)}</span><span class="gk">${g.kind}・排名 ${g.rank}</span></div>
+      <div class="g3"><div><div class="k">中位數 RS</div><div class="v">${st.med}</div></div>
+        <div><div class="k">RS≥80 佔比</div><div class="v">${st.pct}%</div></div>
+        <div><div class="k">近 3 月中位數</div><div class="v ${cls(st.m3)}">${f1(st.m3)}</div></div></div>
+      <span class="pill ${st.kind}">${esc(st.verdict)}</span>
+      <span class="pass">${st.count} 檔・${pass}${st.count < D.thresholds.min_stocks ? "・樣本少於 5 檔，僅供參考" : ""}</span>
+    </button>`;
+  }
+
+  function renderStock(code) {
+    const s = D.stocks[code];
+    if (!s) {
+      const hits = findMatches(code).slice(0, 12);
+      main.innerHTML = `<section class="panel"><h2>找不到「${esc(code)}」</h2>
+        <p class="muted">這個代號不在 RS 排名中。可能是興櫃、ETF、上市未滿 3 個月、停牌中，或代號不存在。</p>
+        ${hits.length ? `<div class="chips">${hits.map(c => `<button class="chip" data-code="${c}">${c}<span>${esc(D.stocks[c].n)}</span></button>`).join("")}</div>` : ""}</section>`;
+      return;
+    }
+    current = code;
+    const gs = groupsFor(code);
+    if (!activeGroup || !gs.some(g => g.key === activeGroup)) activeGroup = gs[gs.length > 1 ? 1 : 0].key;
+    const g = gs.find(x => x.key === activeGroup);
+    const notes = [];
+    if (s.rs >= 80 && s.tt >= 6 && s.oh >= -15) notes.push(["good", "真強勢：RS 高、趨勢模板完整、接近 52 週高點，值得看圖。"]);
+    else if (s.rs >= 80 && s.tt <= 5 && s.oh <= -30) notes.push(["bad", "排名假象：RS 靠過去漲幅撐著，線型已破、距高點深。"]);
+    else if (s.rs < 80 && s.tt >= 6 && s.r[0] > 15) notes.push(["warn", "落後補漲／修復中：位階還沒到。"]);
+    else if (s.rs >= 80 && s.tt < 6) notes.push(["warn", `RS 達強勢標準，但趨勢模板只有 ${s.tt}/7，先確認線型。`]);
+    if (s.v20 != null && s.v20 < 50) notes.push(["bad", "流動性不足：日均成交值低於 5,000 萬，實務上難以操作。"]);
+    else if (s.v20 != null && s.v20 < 300) notes.push(["warn", "流動性偏低：只能容納小部位，滑價明顯。"]);
+    if (s.to != null && s.to >= 30) notes.push(["bad", `日換手率 ${s.to}%，極端投機、過熱。`]);
+    const pos = Math.max(1, Math.min(99, s.rs));
+    const candidates = g.codes.filter(c => { const t = D.stocks[c]; return t.rs >= 80 && t.tt >= 6 && (t.v20 == null || t.v20 >= 300); });
+
+    main.innerHTML = `${screenPanel(code)}
+    <section class="panel hero" aria-label="個股摘要">
+      <div>
+        <div class="idline"><span class="name">${esc(s.n)}</span><span class="code">${code}</span></div>
+        <div class="tags"><span class="tag">${s.m === "twse" ? "上市" : "上櫃"}</span>
+          <button class="tag link" data-ind="${esc(s.i)}">${esc(s.i)}</button>
+          ${gs.slice(1).map(x => `<button class="tag link" data-theme="${esc(x.name)}">${esc(x.name)}</button>`).join("")}
+          ${s.lt !== D.as_of ? `<span class="tag">最後成交 ${s.lt}</span>` : ""}</div>
+        <div class="rsrow"><div class="rsbig ${s.rs >= 80 ? "up" : s.rs < 50 ? "down" : ""}">${s.rs}</div>
+          <div class="rsmeta"><span class="eyebrow">RS 相對強度・全市場 ${D.total.toLocaleString()} 檔</span><span class="level">${level(s.rs)}</span>
+          <div class="rsbar" aria-hidden="true"><b style="left:50%"></b><b style="left:80%"></b><b style="left:90%"></b><i style="left:calc(${pos}% - 1px)"></i></div></div></div>
+        <div class="notes">${notes.map(([k, t]) => `<div class="note ${k}">${t}</div>`).join("") || '<div class="note">沒有特別警示。</div>'}</div>
+      </div>
+      <div>
+        <div class="eyebrow">近 52 週還原收盤・收盤 <span class="num">${s.c}</span></div>
+        ${sparkSVG(s)}
+        <div class="tt" aria-label="趨勢模板 7 項">${TT_LABELS.map((t, i) => `<span class="${s.ttc[i] ? "ok" : ""}">${t}</span>`).join("")}</div>
+      </div>
+      <div class="metrics" style="grid-column:1/-1">
+        <div class="metric"><div class="k">近 3 月</div><div class="v ${cls(s.r[0])}">${f1(s.r[0])}</div></div>
+        <div class="metric"><div class="k">近 6 月</div><div class="v ${cls(s.r[1])}">${f1(s.r[1])}</div></div>
+        <div class="metric"><div class="k">近 9 月</div><div class="v ${cls(s.r[2])}">${f1(s.r[2])}</div></div>
+        <div class="metric"><div class="k">近 12 月</div><div class="v ${cls(s.r[3])}">${f1(s.r[3])}</div></div>
+        <div class="metric"><div class="k">趨勢模板</div><div class="v">${s.tt >= 0 ? s.tt + "/7" : "資料不足"}</div></div>
+        <div class="metric"><div class="k">距 52 週高</div><div class="v ${s.oh <= -30 ? "down" : ""}">${s.oh == null ? "—" : s.oh.toFixed(1) + "%"}</div></div>
+        <div class="metric"><div class="k">市值（億）</div><div class="v">${fint(s.cap)}</div></div>
+        <div class="metric"><div class="k">20 日均成交值（百萬）</div><div class="v">${fint(s.v20)}</div></div>
+        <div class="metric"><div class="k">日換手率</div><div class="v">${s.to == null ? "—" : s.to.toFixed(2) + "%"}</div></div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="族群強度">
+      <h2>族群強度<small>點選族群卡切換下方排名</small></h2>
+      <div class="groups">${gs.map(x => gcard(x, x.key === activeGroup)).join("")}</div>
+      ${gs.length === 1 ? `<p class="muted" style="margin:10px 0 0;font-size:13px">這檔不在任何細分族群中，可以把代號加進 scripts/細分族群.json。</p>` : ""}
+    </section>
+
+    <section class="panel" aria-label="族群內排名">
+      <h2>${esc(g.name)}・族群內排名<small>${g.kind}，依原始加權分數排序，點選列可切換個股</small></h2>
+      <div class="split">
+        <div style="min-width:0">${memberTable(g.codes.length > 40 ? topAround(g.codes, code) : g.codes, code, g.codes)}
+          ${g.codes.length > 40 ? `<p class="muted" style="font-size:12.5px;margin:6px 0 0">共 ${g.codes.length} 檔，顯示前 25 名與目標股前後。</p>` : ""}</div>
+        <div style="min-width:0"><h2 style="font-size:15px">領導股判定</h2>${leaderBlock(g.codes, code)}
+          <h2 style="font-size:15px;margin-top:18px">值得看形態的候選<small>RS≥80、模板≥6/7、日均值≥300 百萬</small></h2>
+          ${candidates.length ? `<div class="chips">${candidates.map(c => `<button class="chip" data-code="${c}">${c}<span>${esc(D.stocks[c].n)}・RS ${D.stocks[c].rs}・${D.stocks[c].tt}/7</span></button>`).join("")}</div>` : '<p class="muted" style="margin:0">此族群目前沒有同時符合三項條件的股票。</p>'}
+        </div>
+      </div>
+    </section>`;
+    try { history.replaceState(null, "", "#" + code); } catch (e) {}
+  }
+
+  function topAround(codes, me) {
+    const i = codes.indexOf(me);
+    const set = new Set(codes.slice(0, 25));
+    for (let k = Math.max(0, i - 3); k <= Math.min(codes.length - 1, i + 3); k++) set.add(codes[k]);
+    return codes.filter(c => set.has(c));
+  }
+
+  function rankTable(rows, nameKey, isTheme) {
+    const body = rows.map(r => {
+      const codes = isTheme ? r.codes : r.top3;
+      return `<tr class="click" tabindex="0" data-${isTheme ? "theme" : "ind"}="${esc(r[nameKey])}">
+        <td>${r.rank}</td><td class="l"><b>${esc(r[nameKey])}</b>${r.small_sample ? '<span class="flag warn">樣本少</span>' : ""}</td>
+        <td>${r.count}</td><td><span class="rsc ${rsCls(r.median_rs)}">${r.median_rs}</span></td><td>${r.pct_rs80}%</td>
+        <td class="${cls(r.median_ret3m)}">${f1(r.median_ret3m)}</td>
+        <td class="l"><span class="pill ${verdictKind(r)}">${esc(shortVerdict(r.verdict))}</span></td>
+        <td class="l">${codes.slice(0, 3).map(c => D.stocks[c] ? `${esc(D.stocks[c].n)} <span class="dim num">${D.stocks[c].rs}</span>` : c).join("、")}</td></tr>`;
+    }).join("");
+    return `<div class="tblwrap"><table><thead><tr><th>#</th><th class="l">${isTheme ? "細分族群" : "產業"}</th><th>檔數</th><th>中位數 RS</th><th>RS≥80 佔比</th><th>近 3 月中位數</th><th class="l">判讀</th><th class="l">前三強</th></tr></thead><tbody>${body}</tbody></table></div>`;
+  }
+  const verdictKind = r => r.verdict.startsWith("真") ? "true" : r.verdict.startsWith("假") ? "fake" : r.verdict.startsWith("非") ? "none" : "mid";
+  const shortVerdict = v => v.replace(/（.*）/, "");
+
+  function renderRanking(kind) {
+    const isTheme = kind === "themes";
+    const rows = isTheme ? D.themes : D.industries;
+    const strong = rows.filter(r => r.is_strong);
+    const neg = D.industries.filter(r => r.median_ret3m < 0).length;
+    main.innerHTML = `<section class="panel">
+      <h2>${isTheme ? "細分族群強度排行" : "官方產業強度排行"}<small>${rows.length} 個族群・資料日 ${D.as_of}</small></h2>
+      <div class="legend" style="margin-bottom:12px">
+        <span>門檻：中位數 RS ≥ ${D.thresholds.median_rs} 且 RS≥80 佔比 ≥ ${D.thresholds.pct80}%。通過 ${strong.length} 個，其中真族群行情 ${strong.filter(r => r.verdict.startsWith("真")).length} 個、假強勢 ${strong.filter(r => r.verdict.startsWith("假")).length} 個。</span>
+        ${isTheme ? "<span>細分族群本身就是挑過的熱門題材，看名次與中位數 RS 的相對高低比看是否過門檻更有意義。</span>"
+          : `<span>市場廣度：${D.industries.length} 個產業中有 ${neg} 個近 3 月中位數報酬為負${neg > D.industries.length / 2 ? "，指數強勢可能只靠少數權值股撐盤，偏個股行情。" : "。"}</span>`}
+      </div>
+      ${rankTable(rows, isTheme ? "theme" : "industry", isTheme)}
+    </section>`;
+  }
+
+  function renderGroupPage(kind, name) {
+    const codes = sortRaw(kind === "theme" ? (D.theme_def[name] || []) : indCodes(name));
+    const st = groupStats(codes);
+    if (!st) { main.innerHTML = `<section class="panel"><h2>${esc(name)}</h2><p class="muted">沒有資料。</p></section>`; return; }
+    const cands = codes.filter(c => { const t = D.stocks[c]; return t.rs >= 80 && t.tt >= 6 && (t.v20 == null || t.v20 >= 300); });
+    main.innerHTML = `<section class="panel">
+      <h2>${esc(name)}<small>${kind === "theme" ? "細分族群" : "官方產業"}・${st.count} 檔</small></h2>
+      <div class="groups" style="margin-bottom:14px">${gcard({ key: "x", name, kind: kind === "theme" ? "細分族群" : "官方產業", codes, rank: rankOf(kind, name) }, false)}</div>
+      <h2 style="font-size:15px">值得看形態的候選<small>RS≥80、模板≥6/7、日均值≥300 百萬</small></h2>
+      ${cands.length ? `<div class="chips" style="margin-bottom:14px">${cands.map(c => `<button class="chip" data-code="${c}">${c}<span>${esc(D.stocks[c].n)}・RS ${D.stocks[c].rs}</span></button>`).join("")}</div>` : '<p class="muted">目前沒有。</p>'}
+      ${memberTable(codes, null)}
+    </section>`;
+  }
+  const rankOf = (kind, name) => {
+    const r = kind === "theme" ? D.themes.find(x => x.theme === name) : D.industries.find(x => x.industry === name);
+    return r ? `${r.rank}/${kind === "theme" ? D.themes.length : D.industries.length}` : "—";
+  };
+
+  function setTab(v) {
+    view = v;
+    document.querySelectorAll(".tab").forEach(t => t.setAttribute("aria-selected", String(t.dataset.view === v)));
+  }
+  function go(code) { setTab("stock"); activeGroup = null; renderStock(code); window.scrollTo({ top: 0 }); }
+
+
+  // ================= 篩選清單（VCP／COH／HTF）=================
+  let SC = null, SCMAP = {}, screenSub = "VCP", minBonus = 0;
+  const PAT_NAMES = { VCP: "VCP", COH: "COH", HTF: "HTF", IPO: "新股", TT: "趨勢模板通過" };
+  function leaderInfo(code) {
+    // 族群領導股：所屬族群（細分族群或官方產業）是強勢族群，而且在族群內屬第一梯隊
+    const s = D.stocks[code];
+    if (!s) return [false, "RS 分頁沒有這檔的排名"];
+    let best = null;
+    for (const g of groupsFor(code)) {
+      const st = groupStats(g.codes);
+      const n = g.codes.length, rank = g.codes.indexOf(code) + 1;
+      const first = rank <= Math.max(3, Math.round(n * .03)) && s.rs >= 90;
+      const cand = { g, st, n, rank, first };
+      if (!best || (first && st.strong && !(best.first && best.st.strong)) || (!best.first && rank / n < best.rank / best.n)) best = cand;
+      if (first && st.strong) { best = cand; break; }
+    }
+    if (!best) return [false, "沒有族群資料"];
+    const { g, st, n, rank, first } = best;
+    const where = `${g.name}（${g.kind}）第 ${rank}/${n} 名`;
+    if (first && st.strong) return [true, `${where}，${st.verdict}`];
+    if (first) return [false, `${where}，但族群未達強勢門檻`];
+    return [false, `${where}，不是第一梯隊`];
+  }
+  function bestGroupLabel(code) {
+    const gs = groupsFor(code);
+    const g = gs.length > 1 ? gs[1] : gs[0];
+    return g ? `${g.name} ${g.codes.indexOf(code) + 1}/${g.codes.length}` : "—";
+  }
+  function prepScreen() {
+    SCMAP = {};
+    for (const it of SC.items) {
+      const s = D.stocks[it.code];
+      const rs = s ? s.rs : null;
+      const req = [["RS", rs != null && rs > SC.rs_min, rs == null ? "沒有 RS 排名（新股未滿 3 個月或停牌）" : `RS ${rs} ${rs > SC.rs_min ? ">" : "≤"} ${SC.rs_min}`], ...it.req];
+      const lead = leaderInfo(it.code);
+      const bonus = [...it.bonus, ["族群領導股", lead[0], lead[1]]];
+      it.rs = rs; it.req2 = req; it.bonus2 = bonus;
+      it.listed = req.every(r => r[1]);
+      it.bn = bonus.filter(b => b[2] !== undefined && b[1] === true).length;
+      SCMAP[it.code] = it;
+    }
+  }
+  const mark = b => b === true ? "✓" : b === false ? "✗" : "—";
+  function listOf(sub) {
+    const arr = SC.items.filter(it => it.listed && (sub === "IPO" ? it.track === "新股" : it.track !== "新股" && it.pattern === sub));
+    return arr.sort((a, b) => b.bn - a.bn || (b.rs || 0) - (a.rs || 0));
+  }
+  function scard(it) {
+    const req = it.req2.map(([k, b, t]) => `<span class="rq" title="${esc(t)}">✓ ${esc(k)}</span>`).join("");
+    const bon = it.bonus2.map(([k, b, t]) => `<span class="bx ${b === true ? "y" : b == null ? "na" : ""}" title="${esc(t)}">${mark(b)} ${esc(k)}</span>`).join("");
+    return `<article class="scard" data-bn="${it.bn}">
+      <div class="hd"><span class="nm">${esc(it.name)}</span><span class="cd">${it.code}</span><span class="ind">${esc(it.market)}・${esc(it.industry)}</span>
+        <span class="bn"><small>加分</small>${it.bn}<small>/${it.bonus2.length}</small></span></div>
+      <div class="row"><span class="ptag">${it.pattern}</span>${it.track === "新股" ? '<span class="ptag ipo">新股</span>' : ""}
+        <span class="ptag ${it.status === "已突破" ? "br" : ""}">${it.status}</span>
+        <button class="linkbtn" data-calc="${it.code}">算停損／張數</button><button class="linkbtn" data-code="${it.code}">RS →</button></div>
+      <div class="row"><span class="lbl">必要：</span>${req}</div>
+      <div class="row"><span class="lbl">加分：</span>${bon}</div>
+      <div class="kv3"><div><div class="k">RS</div><div class="v ${it.rs >= 80 ? "up" : ""}">${it.rs ?? "—"}</div></div>
+        <div><div class="k">近 10 日日振幅</div><div class="v">${it.range10 == null ? "—" : (it.range10 * 100).toFixed(1) + "%"}</div></div>
+        <div><div class="k">族群</div><div class="v t">${esc(bestGroupLabel(it.code))}</div></div></div>
+      ${it.chart ? `<img loading="lazy" src="${it.chart}" alt="${esc(it.name)} ${it.pattern} K 線圖">` : ""}
+    </article>`;
+  }
+  function renderScreen() {
+    if (!SC) { main.innerHTML = `<section class="panel"><h2>篩選清單資料載入失敗</h2><p class="muted">讀不到 screener.json。RS 與族群功能仍可使用。</p></section>`; return; }
+    const subs = ["VCP", "COH", "HTF", "IPO"];
+    const counts = Object.fromEntries(subs.map(k => [k, listOf(k).length]));
+    const ttRows = SC.tt_pass.filter(r => D.stocks[r.code] && D.stocks[r.code].rs > SC.rs_min).sort((a, b) => D.stocks[b.code].rs - D.stocks[a.code].rs);
+    let body;
+    if (screenSub === "TT") {
+      body = `<div class="tblwrap"><table><thead><tr><th class="l">股票</th><th class="l">產業</th><th>RS</th><th>收盤</th><th>距高點</th><th class="l">型態</th></tr></thead><tbody>${ttRows.map(r => {
+        const it = SCMAP[r.code];
+        const shape = it ? (it.listed ? `✓ ${it.pattern}・加分 ${it.bn}` : `${it.pattern}（必要未過）`) : "—";
+        return `<tr class="click" tabindex="0" data-code="${r.code}"><td class="l"><span class="num">${r.code}</span> ${esc(r.name)}</td><td class="l">${esc(r.industry)}</td>
+          <td><span class="rsc ${rsCls(D.stocks[r.code].rs)}">${D.stocks[r.code].rs}</span></td><td>${r.close}</td><td>${(r.below_high * 100).toFixed(1)}%</td><td class="l">${shape}</td></tr>`;
+      }).join("")}</tbody></table></div>`;
+    } else {
+      const arr = listOf(screenSub).filter(it => it.bn >= minBonus);
+      body = arr.length ? `<div class="cards">${arr.map(scard).join("")}</div>` : `<div class="empty">今日沒有符合條件的 ${PAT_NAMES[screenSub]}</div>`;
+    }
+    main.innerHTML = `<section class="panel">
+      <h2>型態篩選<small>篩選資料日 ${SC.as_of}・RS 資料日 ${D.as_of}・掃描 ${SC.scanned.toLocaleString()} 檔</small></h2>
+      <div class="subtabs">${subs.map(k => `<button class="stab" data-sub="${k}" aria-pressed="${screenSub === k}">${PAT_NAMES[k]}<span class="num">${counts[k]}</span></button>`).join("")}
+        <button class="stab" data-sub="TT" aria-pressed="${screenSub === "TT"}">趨勢模板通過<span class="num">${ttRows.length}</span></button></div>
+        ${screenSub === "TT" ? "" : `<label class="slider" for="mb">最少加分 <input id="mb" type="range" min="0" max="7" value="${minBonus}"> <b class="num" id="mbv">${minBonus}</b></label>`}
+    </section>
+    ${body}
+    <section class="guide" aria-label="篩選說明">
+      <section><h3>排序與歸類</h3><ul><li>加分多的排前面，同分比 RS</li><li>同一檔符合多種型態時，依 HTF → VCP → COH 歸類</li>
+        <li><b>VCP</b>　橫盤收縮：型態內高點不超過起點 3%，低點墊高</li><li><b>COH</b>　杯深 18–50%、杯身 ≥ 3 週，柄形成中也算</li>
+        <li><b>HTF</b>　旗桿 10 週內漲 ≥ 60%，且比起漲前舊高再高 25% 以上；旗形 1–8 週、回檔 ≤ 30%</li></ul></section>
+      <section><h3>必要條件（全部通過才列入）</h3><ol><li>RS &gt; ${SC.rs_min}</li><li>趨勢模板（Mark 的 50／150／200 日，第 7 條放寬到距高點 30%）</li>
+        <li>右上角：52 週高點在這次型態內，之前沒有更高的舊高</li><li>下跌量縮：近 20 日下跌日均量 &lt; 上漲日均量</li><li>VCP 最後一次收縮 &lt; 10%（日內高低點）</li></ol></section>
+      <section><h3>加分條件（每項 1 分，滿分 7）</h3><ul><li><b>大量突破</b>　突破當天量 ≥ 50 日均量 1.5 倍</li><li><b>寬底</b>　VCP 或杯身整理 ≥ 7 週</li>
+        <li><b>危險點</b>　Pivot 下方 7% 內有 EMA21 支撐</li><li><b>回檔淺</b>　型態最大回檔 ≤ 25%</li><li><b>均線往上</b>　EMA21、SMA50、SMA240 都往上</li>
+        <li><b>抗跌</b>　大盤回檔時，個股跌不到大盤的一半</li><li><b>族群領導股</b>　所屬族群達強勢門檻，且在族群內是第一梯隊（前 3 名或前 3%、RS ≥ 90）</li></ul></section>
+      <section><h3>符號與圖表</h3><ul><li><span class="bx y">✓</span> 符合　<span class="bx">✗</span> 不符合　<span class="bx na">—</span> 不適用或尚未發生</li>
+        <li>滑鼠移到項目上可看原因</li><li>K 線圖：藍虛線＝Pivot、灰虛線＝停損參考；粉紅 EMA21、橘 SMA50、黑 SMA240；成交量橘線＝50 日均量</li><li>點圖可放大</li></ul></section>
+    </section>`;
+  }
+  function screenPanel(code) {
+    const it = SC && SCMAP[code];
+    if (!it) return "";
+    const bon = it.bonus2.map(([k, b, t]) => `<span class="bx ${b === true ? "y" : b == null ? "na" : ""}" title="${esc(t)}">${mark(b)} ${esc(k)}</span>`).join("");
+    const failed = it.req2.filter(r => !r[1]).map(r => `${r[0]}：${r[2]}`);
+    return `<section class="panel spanel" aria-label="型態篩選"><div class="sflex"><div>
+      <h3>型態篩選：${it.pattern}・${it.status}</h3>
+      <p style="margin:0 0 8px">${it.listed ? `<b>列在篩選清單</b>・加分 <b class="num">${it.bn}/${it.bonus2.length}</b>` : `<span class="muted">型態成立，但必要條件沒過：${esc(failed.join("；"))}</span>`}</p>
+      <div class="row" style="padding:0">${bon}</div>
+      <p class="muted" style="font-size:12.5px;margin:10px 0 0">Pivot ${it.pivot}・停損參考 ${it.stop}・近 10 日日振幅 ${it.range10 == null ? "—" : (it.range10 * 100).toFixed(1) + "%"}
+        <button class="linkbtn" style="margin-left:10px" data-calc="${it.code}">算停損／張數 →</button></p></div>
+      <div>${it.chart ? `<img src="${it.chart}" alt="${esc(it.name)} K 線圖">` : ""}</div></div></section>`;
+  }
+  function renderTV() {
+    const tv = c => (D.stocks[c] ? (D.stocks[c].m === "twse" ? "TWSE:" : "TPEX:") : ((SCMAP[c] && SCMAP[c].market === "上櫃") ? "TPEX:" : "TWSE:")) + c;
+    const groups = [];
+    if (SC) {
+      for (const k of ["VCP", "COH", "HTF", "IPO"]) groups.push([PAT_NAMES[k], listOf(k).map(it => tv(it.code))]);
+      groups.push(["趨勢模板通過", SC.tt_pass.filter(r => D.stocks[r.code] && D.stocks[r.code].rs > SC.rs_min).sort((a, b) => D.stocks[b.code].rs - D.stocks[a.code].rs).map(r => tv(r.code))]);
+    }
+    for (const t of D.themes.filter(x => x.is_strong)) groups.push([`強勢族群・${t.theme}`, sortRaw(D.theme_def[t.theme] || []).map(tv)]);
+    const all = groups.filter(g => g[1].length).map(([n, cs]) => `###${n},${cs.join(",")}`).join("\n");
+    main.innerHTML = `<section class="panel"><h2>TradingView 代碼<small>上市標 TWSE、上櫃標 TPEX</small></h2>
+      <p class="muted" style="font-size:13px;margin:0 0 10px">複製後貼到 TradingView 觀察清單的「新增商品」欄位；「複製全部」含 ### 分組標題，可另存成 .txt 用「匯入清單」一次建好分組。</p>
+      <div class="tvb"><div class="tvh"><b>全部（含分組）</b><button class="btn" data-copy="tvall">複製全部</button></div><textarea class="tv" id="tvall" rows="4" readonly>${esc(all)}</textarea></div>
+      ${groups.map(([n, cs], i) => `<div class="tvb"><div class="tvh"><b>${esc(n)}</b><span class="muted num">${cs.length}</span><button class="btn" data-copy="tv${i}">複製</button></div><textarea class="tv" id="tv${i}" rows="2" readonly>${esc(cs.join(","))}</textarea></div>`).join("")}
+    </section>`;
+  }
+  // ================= 停損／張數計算 =================
+  const CK = "twcalc";
+  let C = { p1: "", up: 2, sl: -7, p2: "", bud: "", from: null };
+  try { Object.assign(C, JSON.parse(localStorage.getItem(CK) || "{}")); } catch (err) {}
+  const saveC = () => { try { localStorage.setItem(CK, JSON.stringify({ up: C.up, sl: C.sl, bud: C.bud })); } catch (err) {} };
+  const fp = x => x.toFixed(x < 50 ? 2 : 1);
+  const pct = x => (x > 0 ? "+" : "") + x + "%";
+  function renderCalc() {
+    const it = C.from && SCMAP[C.from];
+    const from = it ? `<div class="from"><span>已帶入 <b>${esc(it.name)} ${it.code}</b> 的 Pivot <b class="num">${it.pivot}</b></span>
+      <span class="muted">篩選器停損參考 ${it.stop}・${it.pattern}・${it.status}</span><button class="linkbtn" data-code="${it.code}">RS →</button></div>` : "";
+    main.innerHTML = `<section class="panel"><h2>停損／張數計算<small>輸入後自動計算</small></h2>${from}</section>
+    <div class="calcs">
+      <section class="panel calc" aria-label="停損計算器"><h2 style="margin:0">停損計算器</h2>
+        <label class="fld"><span>買入價格</span><div class="inbox"><input id="c-p1" type="number" inputmode="decimal" min="0" step="any" placeholder="例如：150" value="${C.p1}"><i>元</i></div></label>
+        <label class="fld"><span>最高願意買進價格<b id="c-upv">${pct(C.up)}</b></span><input id="c-up" type="range" min="0" max="10" step="0.5" value="${C.up}"></label>
+        <label class="fld"><span>停損比例<b id="c-slv">${pct(C.sl)}</b></span><input id="c-sl" type="range" min="-20" max="-1" step="0.5" value="${C.sl}"></label>
+        <div class="outs" id="c-o1"></div>
+      </section>
+      <section class="panel calc" aria-label="買入張數計算器"><h2 style="margin:0">買入張數計算器</h2>
+        <label class="fld"><span>買入價格</span><div class="inbox"><input id="c-p2" type="number" inputmode="decimal" min="0" step="any" placeholder="例如：150" value="${C.p2}"><i>元</i></div></label>
+        <label class="fld"><span>投入總金額</span><div class="inbox"><input id="c-bud" type="number" inputmode="numeric" min="0" step="any" placeholder="例如：500000" value="${C.bud}"><i>元</i></div></label>
+        <div class="outs one" id="c-o2"></div>
+      </section>
+    </div>
+    <p class="muted" style="font-size:12.5px;margin:0">張數以 1 張＝1,000 股計算，未扣手續費與交易稅。價格四捨五入到小數 1 位（50 元以下到 2 位），實際下單請依台股升降單位調整。</p>`;
+    updCalc();
+  }
+  function updCalc() {
+    const o1 = $("#c-o1"), o2 = $("#c-o2"); if (!o1) return;
+    const p1 = parseFloat(C.p1), p2 = parseFloat(C.p2), bud = parseFloat(C.bud);
+    o1.innerHTML = p1 > 0 ? `<div class="out"><div class="k">最高買進價格（${pct(C.up)}）</div><div class="v up">${fp(p1 * (1 + C.up / 100))}<small>元</small></div></div>
+      <div class="out"><div class="k">停損價格（${pct(C.sl)}）</div><div class="v down">${fp(p1 * (1 + C.sl / 100))}<small>元</small></div>
+      <div class="s">每張最多虧損約 ${Math.round(p1 * -C.sl * 10).toLocaleString()} 元</div></div>`
+      : `<div class="out" style="grid-column:1/-1"><div class="s">輸入買入價格後自動計算</div></div>`;
+    if (p2 > 0 && bud > 0) {
+      const sh = Math.floor(bud / p2), lots = Math.floor(sh / 1000), odd = sh - lots * 1000;
+      o2.innerHTML = `<div class="out"><div class="k">可買入張數</div><div class="v">${(bud / (p2 * 1000)).toFixed(1)}<small>張</small></div>
+        <div class="s">整張 ${lots} 張${odd ? `＋零股 ${odd.toLocaleString()} 股` : ""}・共 ${sh.toLocaleString()} 股，約 ${Math.round(sh * p2).toLocaleString()} 元</div></div>`;
+    } else o2.innerHTML = `<div class="out"><div class="s">輸入價格與金額後自動計算</div></div>`;
+  }
+  function openCalc(code) {
+    const it = SCMAP[code];
+    if (it) { C.from = code; C.p1 = C.p2 = String(it.pivot); }
+    setTab("calc"); renderCalc(); window.scrollTo({ top: 0 });
+    try { history.replaceState(null, "", "#calc"); } catch (err) {}
+  }
+  document.addEventListener("input", e => {
+    const id = e.target.id; if (!id.startsWith("c-")) return;
+    const v = e.target.value;
+    if (id === "c-p1") { C.p1 = v; if (!C.p2 || C.p2 === C._last) { C.p2 = v; const t = $("#c-p2"); if (t) t.value = v; } C._last = v; }
+    else if (id === "c-p2") C.p2 = v;
+    else if (id === "c-bud") C.bud = v;
+    else if (id === "c-up") { C.up = +v; $("#c-upv").textContent = pct(C.up); }
+    else if (id === "c-sl") { C.sl = +v; $("#c-slv").textContent = pct(C.sl); }
+    if ((id === "c-p1" || id === "c-p2") && C.from) { C.from = null; const f = document.querySelector(".from"); if (f) f.remove(); }
+    saveC(); updCalc();
+  });
+  document.addEventListener("click", async e => {
+    const cb = e.target.closest("[data-calc]"); if (cb) { openCalc(cb.dataset.calc); return; }
+    const st = e.target.closest(".stab"); if (st && SC) { screenSub = st.dataset.sub; renderScreen(); return; }
+    const cp = e.target.closest("[data-copy]");
+    if (cp) { const ta = document.getElementById(cp.dataset.copy); try { await navigator.clipboard.writeText(ta.value); } catch (err) { ta.select(); }
+      const o = cp.textContent; cp.textContent = "已複製"; setTimeout(() => cp.textContent = o, 1400); return; }
+    const im = e.target.closest(".scard img, .spanel img");
+    if (im) { const z = document.createElement("div"); z.className = "zoom"; z.innerHTML = `<img src="${im.src}" alt="">`; z.onclick = () => z.remove(); document.body.appendChild(z); }
+  });
+  document.addEventListener("input", e => {
+    if (e.target.id === "mb") { minBonus = +e.target.value; $("#mbv").textContent = minBonus;
+      document.querySelectorAll(".scard").forEach(c => c.hidden = +c.dataset.bn < minBonus); }
+  });
+
+
+  // ================= 抗跌股 =================
+  let PB = null, pbLeg = null, pbFil = "res", pbTT = false, pbShow = 60;
+  const pct1 = x => x == null ? "—" : (x > 0 ? "+" : "") + (x * 100).toFixed(1) + "%";
+  const mdd = s => { const [y, m, d] = s.split("-"); return `${+m}/${+d}`; };
+  const legIdx = (L, s) => s.m === "tpex" ? L.tpex : L.twse;
+  const resist = (r, ix) => r != null && ix != null && r >= ix / 2;
+  function legLabel(L) { return L.ongoing ? `${mdd(L.peak)} 起・進行中` : `${mdd(L.peak)}～${mdd(L.end)}`; }
+  function renderPB() {
+    if (!PB) { main.innerHTML = `<section class="panel"><h2>抗跌股資料載入失敗</h2><p class="muted">讀不到 pullback.json，可能今天的更新還沒完成。請稍後重新整理。</p></section>`; return; }
+    const legs = PB.legs, K = legs.length;
+    if (pbLeg == null || pbLeg >= K) pbLeg = K - 1;
+    const L = legs[pbLeg];
+    const tt = new Set(SC && SC.tt_pass ? SC.tt_pass.map(r => r.code) : []);
+    const all = PB.stocks.filter(s => s.r[pbLeg] != null).map(s => {
+      const ix = legIdx(L, s), r = s.r[pbLeg];
+      const marks = legs.map((LL, k) => s.r[k] == null ? null : resist(s.r[k], legIdx(LL, s)));
+      return { s, r, ix, rel: r - ix, marks, s3: marks.every(x => x === true), rs: D.stocks[s.c] ? D.stocks[s.c].rs : null, tt: tt.has(s.c) };
+    });
+    const nUp = all.filter(x => x.r > 0).length, nRes = all.filter(x => resist(x.r, x.ix)).length, n3 = all.filter(x => x.s3).length;
+    let rows = all.filter(x => pbFil === "up" ? x.r > 0 : pbFil === "s3" ? x.s3 : resist(x.r, x.ix));
+    if (pbTT) rows = rows.filter(x => x.tt);
+    rows.sort((a, b) => b.rel - a.rel);
+    const segs = legs.map((LL, k) => `<button class="stab" data-pbleg="${k}" aria-pressed="${k === pbLeg}">${legLabel(LL)}<span class="num">${pct1(LL.twse)}</span></button>`).reverse().join("");
+    const fil = [["res", `抗跌 ${nRes}`], ["up", `逆勢上漲 ${nUp}`], ["s3", `${K} 次都抗跌 ${n3}`]]
+      .map(([k, t]) => `<button class="stab" data-pbfil="${k}" aria-pressed="${pbFil === k}">${t}</button>`).join("");
+    const reb = L.ongoing ? "" : `　之後到 ${mdd(PB.as_of)} 加權反彈 ${pct1(L.twse_rebound)}`;
+    const list = rows.slice(0, pbShow).map((x, i) => {
+      const s = x.s, dots = x.marks.map(m => `<i class="${m ? "on" : "off"}">${m ? "●" : "○"}</i>`).join("");
+      const sub = [`比${s.m === "tpex" ? "櫃買" : "加權"}${x.rel >= 0 ? "強" : "弱"} ${(Math.abs(x.rel) * 100).toFixed(1)}%`,
+        x.rs != null ? `RS ${x.rs}` : null, `距 52 週高 ${pct1(s.oh)}`, x.tt ? "通過趨勢模板" : null, s.i || null].filter(Boolean).join("・");
+      return `<li><span class="rk">${i + 1}</span><button class="who" data-code="${s.c}"><b>${esc(s.n)}</b><span class="num">${s.c}</span>${s.nh ? '<span class="pbtag nh">近 5 日創新高</span>' : ""}${x.s3 ? `<span class="pbtag s3">${K} 次都抗跌</span>` : ""}<span class="s">${esc(sub)}</span></button>
+        <span class="pct"><span class="v ${x.r > 0 ? "up" : x.r < 0 ? "down" : ""}">${pct1(x.r)}</span><span class="x dots" title="最近 ${K} 次回檔是否抗跌（舊→新）">${dots}</span></span></li>`;
+    }).join("");
+    main.innerHTML = `<section class="panel"><h2>抗跌股<small>大盤回檔時，跌得比大盤少、甚至逆勢上漲的股票</small></h2>
+      <div class="subtabs" role="group" aria-label="選擇回檔">${segs}</div>
+      <p class="pbsum">加權 ${mdd(L.peak)} 高點到 ${mdd(L.end)} <b class="dn">${pct1(L.twse)}</b>，櫃買同期 <b class="dn">${pct1(L.tpex)}</b>（${L.days} 個交易日${L.ongoing ? "，還在回檔中" : ""}）${reb}。<br>
+      有流動性的 ${all.length} 檔裡，逆勢上漲 ${nUp} 檔、跌幅不到大盤一半 ${nRes} 檔。</p>
+      <div class="pbfil"><div class="subtabs" role="group" aria-label="篩選">${fil}</div>
+        <label><input type="checkbox" id="pbtt" ${pbTT ? "checked" : ""}> 只看通過趨勢模板</label></div></section>
+    <section class="panel">${rows.length ? `<ul class="pbl">${list}</ul>${rows.length > pbShow ? `<div class="pbmore"><button class="btn" type="button" id="pbmore">再顯示 ${Math.min(60, rows.length - pbShow)} 檔（共 ${rows.length} 檔）</button></div>` : ""}`
+      : '<p class="muted" style="margin:0">沒有符合條件的股票。</p>'}</section>
+    <section class="guide" aria-label="說明"><section><h3>怎麼算</h3><ul>
+      <li><b>大盤回檔</b>　加權指數收盤從波段高點拉回 5% 以上；從低點反彈 5% 才算這段結束，還在跌的比到最新一天</li>
+      <li><b>同期漲跌</b>　個股在同一段日期（高點那天收盤到結束那天收盤）的漲跌幅；上市股比加權、上櫃股比櫃買</li>
+      <li><b>抗跌</b>　跌幅不到指數的一半，包含逆勢上漲；依「比大盤強多少」排序</li></ul></section>
+      <section><h3>圓點</h3><ul><li>最近 ${K} 次大盤回檔是否抗跌，由舊到新；藍色實心＝抗跌</li><li>每次都抗跌的股票，代表跌勢中一直有人在買</li></ul></section>
+      <section><h3>範圍</h3><ul><li>股價 ≥ 10 元、20 日均成交額 ≥ 3,000 萬</li><li>每個交易日傍晚跟著篩選程式一起更新，資料日 ${mdd(PB.as_of)}</li></ul></section></section>`;
+  }
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-pbleg]"); if (a) { pbLeg = +a.dataset.pbleg; pbShow = 60; renderPB(); return; }
+    const f = e.target.closest("[data-pbfil]"); if (f) { pbFil = f.dataset.pbfil; pbShow = 60; renderPB(); return; }
+    if (e.target.id === "pbmore") { pbShow += 60; renderPB(); }
+  });
+  document.addEventListener("change", e => { if (e.target.id === "pbtt") { pbTT = e.target.checked; pbShow = 60; renderPB(); } });
+
+  // ================= 處置股 =================
+  let DP = null, dpSel = null, HOLD = [], holdDoc = null, holdMode = "local", holdQ = Promise.resolve();
+  const DST = { disp: ["處置中", "bad"], next: ["已公告處置", "bad"], soon: ["即將處置", "warn"], notice: ["注意股", "note"], watch: ["有注意紀錄", "mute"], ok: ["正常", "good"] };
+  const DORD = { disp: 0, next: 1, soon: 2, notice: 3, watch: 4, ok: 5 };
+  const DCNT = [["連續 3 次", 3, "只算第一款"], ["連續 5 次", 5, "第一～八款"], ["10 日內 6 次", 6, "第一～八款"], ["30 日內 12 次", 12, "第一～八款"]];
+  const md = s => { const [y, m, d] = s.split("-"); return `${+m}/${+d}`; };
+  const dpName = c => (DP && DP.stocks[c] && DP.stocks[c].n) || (D && D.stocks[c] && D.stocks[c].n) || "";
+  function dpStat(c) {
+    const s = DP && DP.stocks[c];
+    if (!s) return { k: "ok", sub: "近 30 個營業日沒有注意紀錄", s: null };
+    const cur = s.disp.find(x => x.start <= DP.as_of && DP.as_of <= x.end), nxt = s.disp.find(x => x.start > DP.as_of);
+    let sub;
+    if (s.st === "next") sub = `${md(nxt.start)} 起處置，到 ${md(nxt.end)}`;
+    else if (s.st === "disp") sub = `處置期間 ${md(cur.start)}～${md(cur.end)}`;
+    else if (s.st === "soon") {
+      const near = DCNT.map((d, i) => [d, s.c[i]]).filter(([d, v]) => v >= d[1] - 1).map(([d, v]) => `${d[0]}已累計 ${v} 次`);
+      sub = `再被列注意 1 次就可能處置（${near.join("、")}）`;
+    } else if (s.st === "notice") sub = `${md(DP.as_of)} 被列注意股，累計還沒到處置門檻`;
+    else if (s.st === "watch") sub = "近期有注意紀錄，累計還沒到處置門檻";
+    else sub = "目前沒有有效的注意累計";
+    return { k: s.st, sub, s, cur, nxt };
+  }
+  const badge = k => `<span class="dstat ${DST[k][1]}">${DST[k][0]}</span>`;
+  function dpResolve(v) {
+    v = v.trim(); if (!v) return null;
+    const m = v.match(/^(\d{4}[A-Z]?)/); if (m) return m[1];
+    const pool = [...Object.entries(DP ? DP.stocks : {}).map(([c, s]) => [c, s.n]), ...Object.entries(D.stocks).map(([c, s]) => [c, s.n])];
+    const hit = pool.find(([c, n]) => n === v) || pool.find(([c, n]) => n.includes(v));
+    return hit ? hit[0] : null;
+  }
+  function dpResult(c) {
+    if (!c) return "";
+    const name = dpName(c), st = dpStat(c), s = st.s;
+    if (!name) return `<p class="muted" style="margin:14px 0 0">找不到「${esc(c)}」。請輸入上市櫃股票代號，例如 2330。</p>`;
+    const cnt = DCNT.map(([t, th, note], i) => {
+      const v = s ? s.c[i] : 0, hot = v >= th - 1;
+      return `<div class="dc${hot ? " hot" : ""}"><div class="k">${t}</div><div class="v">${v}<small> / ${th}</small></div>
+        <div class="bar"><i style="width:${Math.min(100, v / th * 100)}%"></i></div><div class="s">${v >= th ? "已達門檻" : `差 ${th - v} 次`}・${note}</div></div>`;
+    }).join("");
+    const dd = st.nxt || st.cur;
+    const box = dd ? `<div class="dbox"><b>${st.nxt ? "已公告處置" : "處置中"}</b>　${md(dd.start)}～${md(dd.end)}・${esc(dd.kind)}・原因：${esc(dd.why)}${dd.how ? `<br>${esc(dd.how)}` : ""}</div>` : "";
+    const notes = s && s.notes.length ? `<h3 style="font-size:15px;margin:18px 0 4px">近 30 個營業日注意紀錄</h3>
+      <ul class="dnl">${s.notes.map(([d, k, t, eff]) => {
+        const tag = !eff ? "已用於前次處置" : !k.some(n => n >= 1 && n <= 8) ? "不計入累計" : "計入累計";
+        return `<li class="${tag === "計入累計" ? "" : "off"}"><div class="h"><b class="num">${md(d)}</b><span>${k.map(n => "第" + n + "款").join("、") || "—"}</span><span class="t">${tag}</span></div><div class="x">${esc(t)}</div></li>`;
+      }).join("")}</ul>` : "";
+    const past = s ? s.disp.filter(x => x !== dd).slice(0, 3) : [];
+    const pastH = past.length ? `<p class="dmeta">過去處置：${past.map(x => `${md(x.start)}～${md(x.end)}（${esc(x.kind)}，${esc(x.why)}）`).join("；")}</p>` : "";
+    const inHold = HOLD.includes(c);
+    return `<div style="margin-top:16px"><div class="dhd"><span class="nm">${esc(name)}</span><span class="cd">${c}</span>${badge(st.k)}
+        <button class="linkbtn" style="margin-left:auto" data-hadd="${c}" ${inHold ? "disabled" : ""}>${inHold ? "已在我的持股" : "加入我的持股"}</button></div>
+      <p class="dsub">${esc(st.sub)}</p>${box}<div class="dcnt">${cnt}</div>${notes}${pastH}</div>`;
+  }
+  function holdHTML() {
+    if (!HOLD.length) return `<p class="muted" style="margin:12px 0 0">還沒有持股。輸入代號或名稱加入後，這裡會顯示每檔目前的處置狀態。</p>`;
+    const rows = HOLD.map(c => [c, dpStat(c)]).sort((a, b) => DORD[a[1].k] - DORD[b[1].k] || a[0].localeCompare(b[0]));
+    return `<ul class="hlist" style="margin-top:8px">${rows.map(([c, st]) => `<li><button class="who" data-dsel="${c}"><b>${esc(dpName(c) || c)}</b><span class="num">${c}</span><span class="s">${esc(st.sub)}</span></button>
+      ${badge(st.k)}<button class="rm" data-hrm="${c}" aria-label="從持股刪除 ${esc(dpName(c) || c)}">×</button></li>`).join("")}</ul>`;
+  }
+  function renderDisp() {
+    if (!DP) { main.innerHTML = `<section class="panel"><h2>處置股資料載入失敗</h2><p class="muted">讀不到 disposal.json，可能今天的更新還沒完成。請稍後重新整理。</p></section>`; return; }
+    const opts = [...new Map([...Object.entries(D.stocks).map(([c, s]) => [c, s.n]), ...Object.entries(DP.stocks).map(([c, s]) => [c, s.n])]).entries()]
+      .map(([c, n]) => `<option value="${c} ${esc(n)}">`).join("");
+    main.innerHTML = `<datalist id="dplist">${opts}</datalist>
+    <section class="panel"><h2>查個股處置狀態<small>資料日 ${md(DP.as_of)}・更新 ${DP.generated_at.slice(5)}</small></h2>
+      <form class="dform" id="dqf" autocomplete="off"><div class="inbox"><input id="dq" list="dplist" placeholder="輸入代號或名稱，例如 2033、佳大" aria-label="股票代號或名稱"></div><button class="btn" type="submit">查詢</button></form>
+      <div id="dres">${dpResult(dpSel)}</div></section>
+    <section class="panel"><h2>我的持股<small>${holdMode === "db" ? "手機、電腦同步，只有你看得到" : "存在這台裝置的瀏覽器"}</small></h2>
+      <form class="dform" id="dhf" autocomplete="off"><div class="inbox"><input id="dh" list="dplist" placeholder="輸入代號或名稱加入持股" aria-label="加入持股"></div><button class="btn" type="submit">加入</button></form>
+      <div id="dhold">${holdHTML()}</div></section>
+    <section class="guide" aria-label="處置規則"><section><h3>怎麼判斷</h3><ul>
+      <li><b>處置中／已公告處置</b>　證交所或櫃買中心已公告的處置期間</li>
+      <li><b>即將處置</b>　四項累計任一項只差 1 次，下個交易日再被列注意就可能處置</li>
+      <li><b>注意股</b>　資料日當天被列注意股，但累計還沒到門檻</li></ul></section>
+      <section><h3>四項累計</h3><ul><li>連續 3 個營業日第一款（6 日漲跌幅異常）</li><li>連續 5 個營業日第一～八款</li><li>最近 10 個營業日內有 6 日、30 個營業日內有 12 日第一～八款</li>
+      <li>已用來觸發前一次處置的注意紀錄不再計入；第九款以後（週轉率、當沖等）不計入</li></ul></section>
+      <section><h3>資料</h3><ul><li>每個交易日傍晚從證交所、櫃買中心公告抓取</li><li>累計是依公開規則推算，實際以官方公告為準</li></ul></section></section>`;
+  }
+  function dpShow(c) { dpSel = c; const r = $("#dres"); if (r) r.innerHTML = dpResult(c); }
+  function holdRefresh() { const h = $("#dhold"); if (h) h.innerHTML = holdHTML(); if (dpSel) dpShow(dpSel); }
+  function saveHold() {
+    try { localStorage.setItem("twhold", JSON.stringify(HOLD)); } catch (e) {}
+    if (holdDoc) { const codes = HOLD.slice(); holdQ = holdQ.then(() => holdDoc.set({ codes, updatedAt: Date.now() })).catch(() => {}); }
+  }
+  function holdAdd(c) { if (!c || HOLD.includes(c)) return; HOLD.push(c); saveHold(); holdRefresh(); }
+  async function initHold() {
+    try { HOLD = JSON.parse(localStorage.getItem("twhold") || "[]"); } catch (e) {}
+    const cl = window.claude; if (!cl || !cl.use) return;
+    try {
+      const [db, user] = await Promise.all([cl.use("db"), cl.use("user")]);
+      if (!db || !user) return;
+      const id = await user.id(); if (!id) return;
+      holdDoc = db.doc("data/users/" + id + "/portfolio");
+      const first = await holdDoc.get();
+      if (first.exists && Array.isArray(first.data().codes)) HOLD = first.data().codes.slice();
+      else if (HOLD.length) await holdDoc.set({ codes: HOLD.slice(), updatedAt: Date.now() });
+      holdMode = "db";
+      if (view === "disp") renderDisp();
+      holdDoc.onSnapshot(snap => {
+        const d = snap.exists ? snap.data() : null;
+        if (d && Array.isArray(d.codes) && JSON.stringify(d.codes) !== JSON.stringify(HOLD)) { HOLD = d.codes.slice(); try { localStorage.setItem("twhold", JSON.stringify(HOLD)); } catch (e) {} holdRefresh(); }
+      }, () => { holdDoc = null; holdMode = "local"; });
+    } catch (e) { holdDoc = null; holdMode = "local"; }
+  }
+  document.addEventListener("submit", e => {
+    if (e.target.id === "dqf") { e.preventDefault(); const c = dpResolve($("#dq").value); dpShow(c || $("#dq").value.trim()); $("#dq").blur(); }
+    if (e.target.id === "dhf") { e.preventDefault(); const v = $("#dh").value, c = dpResolve(v);
+      if (c && dpName(c)) { holdAdd(c); $("#dh").value = ""; } else if (v.trim()) { $("#dhold").insertAdjacentHTML("afterbegin", `<p class="muted" style="margin:10px 0 0">找不到「${esc(v)}」，請輸入上市櫃股票代號。</p>`); } }
+  });
+  document.addEventListener("click", e => {
+    const a = e.target.closest("[data-hadd]"); if (a) { holdAdd(a.dataset.hadd); return; }
+    const r = e.target.closest("[data-hrm]"); if (r) { HOLD = HOLD.filter(c => c !== r.dataset.hrm); saveHold(); holdRefresh(); return; }
+    const s = e.target.closest("[data-dsel]"); if (s) { dpShow(s.dataset.dsel); const q = $("#dq"); if (q) q.value = ""; window.scrollTo({ top: 0, behavior: "smooth" }); }
+  });
+  initHold();
+
+  // ---------- 搜尋 ----------
+  let names = [];
+  function findMatches(q) {
+    q = q.trim(); if (!q) return [];
+    const ql = q.toLowerCase();
+    return names.filter(([c, n]) => c.startsWith(q) || n.toLowerCase().includes(ql)).sort((a, b) => (b[0] === q) - (a[0] === q) || D.stocks[b[0]].rs - D.stocks[a[0]].rs).map(x => x[0]);
+  }
+  const q = $("#q"), sugg = $("#sugg");
+  let sel = -1, list = [];
+  function showSugg() {
+    list = findMatches(q.value).slice(0, 8); sel = -1;
+    if (!list.length) { sugg.hidden = true; return; }
+    sugg.innerHTML = list.map(c => `<button type="button" data-code="${c}"><span class="c">${c}</span><span>${esc(D.stocks[c].n)}</span><span class="i">${esc(D.stocks[c].i)}・RS ${D.stocks[c].rs}</span></button>`).join("");
+    sugg.hidden = false;
+  }
+  q.addEventListener("input", () => D && showSugg());
+  q.addEventListener("keydown", e => {
+    if (sugg.hidden) return;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault(); sel = (sel + (e.key === "ArrowDown" ? 1 : -1) + list.length) % list.length;
+      sugg.querySelectorAll("button").forEach((b, i) => b.classList.toggle("on", i === sel));
+    } else if (e.key === "Escape") sugg.hidden = true;
+  });
+  $("#form").addEventListener("submit", e => {
+    e.preventDefault(); if (!D) return;
+    const v = q.value.trim(); if (!v) return;
+    const pick = sel >= 0 ? list[sel] : (D.stocks[v] ? v : (findMatches(v)[0] || v));
+    sugg.hidden = true; q.blur(); go(pick);
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".search")) sugg.hidden = true;
+  });
+
+  // ---------- 點擊委派 ----------
+  document.addEventListener("click", e => {
+    const t = e.target.closest("[data-code],[data-g],[data-theme],[data-ind],.tab");
+    if (!t || !D) return;
+    if (t.classList.contains("tab")) {
+      const v = t.dataset.view; setTab(v);
+      if (v === "stock") renderStock(current || "2330"); else if (v === "screen") renderScreen(); else if (v === "tv") renderTV(); else if (v === "calc") renderCalc(); else if (v === "disp") renderDisp(); else if (v === "pb") renderPB(); else renderRanking(v);
+      try { history.replaceState(null, "", v === "stock" ? "#" + (current || "2330") : "#" + v); } catch (err) {}
+      return;
+    }
+    if (t.dataset.code) { sugg.hidden = true; q.value = ""; go(t.dataset.code); return; }
+    if (t.dataset.g) { if (t.dataset.g !== "x") { activeGroup = t.dataset.g; renderStock(current); } return; }
+    if (t.dataset.theme) { setTab("themes"); renderGroupPage("theme", t.dataset.theme); window.scrollTo({ top: 0 }); return; }
+    if (t.dataset.ind) { setTab("inds"); renderGroupPage("ind", t.dataset.ind); window.scrollTo({ top: 0 }); return; }
+  });
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter" && e.target.matches("tr.click")) e.target.click();
+  });
+
+  // ---------- 載入 ----------
+  const getJSON = u => fetch(u, { cache: "no-cache" }).then(r => { if (!r.ok) throw new Error(u + " " + r.status); return r.json(); });
+  Promise.all([getJSON("data.json"), getJSON("screener.json").catch(() => null), getJSON("disposal.json").catch(() => null), getJSON("pullback.json").catch(() => null)]).then(([d, sc, dp, pb]) => {
+    D = d; SC = sc; DP = dp; PB = pb;
+    names = Object.entries(D.stocks).map(([c, s]) => [c, s.n]);
+    if (SC) prepScreen();
+    $("#asof").textContent = `RS 資料日 ${D.as_of}` + (SC ? `・篩選 ${SC.as_of}` : "") + `・更新 ${D.generated_at}`;
+    $("#adjinfo").textContent = `本期套用 ${D.adj_report.events_used.toLocaleString()} 筆除權息／減資／面額變更調整。`;
+    const h = (location.hash || "").replace("#", "");
+    if (D.stocks[h]) go(h);
+    else if (h === "themes") { setTab(h); renderRanking(h); }
+    else if (h === "tv") { setTab("tv"); renderTV(); }
+    else if (h === "calc") { setTab("calc"); renderCalc(); }
+    else if (h === "disp") { setTab("disp"); renderDisp(); }
+    else if (h === "pb") { setTab("pb"); renderPB(); }
+    else { setTab("screen"); renderScreen(); }
+  }).catch(err => {
+    main.innerHTML = `<section class="panel"><h2>資料載入失敗</h2><p class="muted">無法讀取資料（${esc(err.message)}）。請重新整理頁面；若仍失敗，請 Claude 重新發布資料。</p></section>`;
+  });
+})();
+</script>
+
+</body></html>
