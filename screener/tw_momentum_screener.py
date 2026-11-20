@@ -78,15 +78,19 @@ CONFIG = {
     "vcp_bad_last_depth": 0.15,     # 最後一段 ≥ 15% 給 0 分
 
     # ---- COH 杯柄 ----
-    "coh_min_cup_days": 15,         # 杯身至少 3 週（依玉晶光範例：9/11–10/13 共 19 個交易日）
-    "coh_max_cup_days": 160,         # 杯身最長約 32 週（2026/11：中再保、達欣工 240 天以上的緩漲不算）
+    "coh_min_cup_days": 15,          # 杯身至少 3 週（太短的杯子靠「柄要成形」擋掉）
+    "coh_max_cup_days": 220,         # 杯身最長約 44 週（2026/11-20：信立 204 天的大底你判 COH；中再保 243 天仍排除）
     "coh_min_depth": 0.18,          # 杯深至少 18%（元大金 15% 只是上升趨勢中的回檔；奇鋐 33%、玉晶光 24%）
     "coh_ideal_max_depth": 0.33,
     "coh_max_depth": 0.50,
-    "coh_min_handle_days": 1,       # 柄形成中也算（依玉晶光範例）
     "coh_max_handle_days": 25,
     "coh_ideal_handle_depth": 0.15,
-    "coh_min_handle_depth": 0.04,   # 柄要真的有拉回（2026/11：寶雅 3%、明泰 0% 不算）
+    "coh_min_handle_depth": 0.04,
+    "coh_min_handle_days": 1,             # 柄最短 1 天（2026/11-20 試過 3 天：會誤殺世禾、玉晶光、倫飛）
+    "coh_quick_handle_depth": 0.08,
+    "htf_short_flag_days": 10,      # 旗形 10 天內，回檔可放寬到 25%（益安、哲固）
+    "htf_short_flag_depth": 0.25,
+    "htf_max_prior_run": 1.00,        # 旗桿起點前 60 天已經漲超過 100%＝延續漲勢，不是新的旗桿（2026/11-20：興能高 122%、金居 249%；你判 HTF 的最多 66%）
     "coh_max_handle_depth": 0.20,
     "coh_min_handle_pos": 0.40,     # 柄的低點至少在杯子 40% 高度以上（2026/11 依倫飛 46%）
     "vcp_cup_first_days": 20,       # VCP 第一段收縮超過 20 個交易日（約 4 週）且杯柄也成立 → 歸杯柄（光聯）
@@ -97,7 +101,7 @@ CONFIG = {
 
     # ---- HTF 高窄旗形 ----
     "htf_min_gain": 0.40,        # 旗桿約 1 個月內漲 40% 以上（2026/11 依凱基金）
-    "htf_min_above_prior": 0.25,    # 旗桿頂要比旗桿起漲前的舊高高出 25% 以上（真正的突破新高，不是跌深反彈；區分奇鋐 COH、由田 VCP）
+    "htf_min_above_prior": 0.25,        # 旗桿頂要比起漲前一年的高點再高 25% 以上，排除跌深反彈
     "htf_min_pole_days": 5,           # 旗桿最短 1 週
     "htf_max_pole_days": 22,          # 旗桿約 1 個月內完成（2026/11：台燿、宜鼎 2–3 個月的慢漲不算）
     "htf_min_flag_days": 5,
@@ -424,7 +428,7 @@ def _vcp_from(d, bs, cfg):
         "ok": True, "score": round(score, 1),
         "pivot": cons[-1]["hi"], "stop": cons[-1]["lo"], "pivot_i": cons[-1]["hi_i"],
         "base_start": bs, "base_days": base_len, "max_depth": depths[0], "last_depth": depths[-1],
-        "first_days": int(cons[0]["lo_i"] - cons[0]["hi_i"]),
+        "first_days": int(cons[0]["lo_i"] - cons[0]["hi_i"]), "n_con": len(cons),
         "rehigh": bool(max(x["hi"] for x in cons[1:]) >= h[bs] * 0.99),          # 右側漲回基底起點高度
         "first_ratio": float(depths[0] / max(max(depths[1:]), 1e-9)),          # 第一段深度 / 後面最深的一段
         "detail": f"{nC}T 收縮 " + "→".join(f"{x:.0%}" for x in depths)
@@ -498,6 +502,9 @@ def detect_coh(d, cfg):
             continue
         if h_depth < cfg["coh_min_handle_depth"]:
             last_reason = f"柄還沒拉回（{h_depth:.0%}）"
+            continue
+        if hd < cfg["coh_min_handle_days"] and h_depth < cfg["coh_quick_handle_depth"]:
+            last_reason = f"柄才 {hd} 天、拉回 {h_depth:.0%}，還沒成形"
             continue
         found = None
         lo_bound = max(10, R - cfg["coh_max_cup_days"])
@@ -598,7 +605,12 @@ def detect_htf(d, cfg):
             continue
         flag_low = l[P + 1:f_end + 1].min()
         f_depth = 1 - flag_low / h[P]
-        if f_depth > cfg["htf_max_flag_depth"]:
+        max_fd = cfg["htf_short_flag_depth"] if fd <= cfg["htf_short_flag_days"] else cfg["htf_max_flag_depth"]
+        pre = l[max(0, S - 60):S]
+        if len(pre) and c[S] / pre.min() - 1 > cfg["htf_max_prior_run"]:
+            last_reason = f"旗桿起點前已漲 {c[S] / pre.min() - 1:.0%}，是延續漲勢不是新的旗桿"
+            continue
+        if f_depth > max_fd:
             last_reason = f"旗形回檔過深（{f_depth:.0%}）"
             continue
         break
@@ -845,6 +857,8 @@ def analyze(data, meta, cfg, asof, indexes=None):
         rec["any_listed"] = any_ok
         # 型態歸類看結構，順序 HTF > VCP > COH；歸類後若必要條件沒過就不列（不會改列到別的型態）
         shape = next((k for k in SHAPE_ORDER if rec[k]["ok"]), None)
+        if shape == "HTF" and rec["VCP"]["ok"] and rec["VCP"].get("n_con", 0) >= 3:
+            shape = "VCP"                             # 旗桿後的整理裡已經收縮 3 次以上，算 VCP（2026/11-20 依金居）
         if shape == "VCP" and rec["COH"]["ok"]:
             vv = rec["VCP"]
             # 第一段下跌超過約 4 週（像圓底，光聯），或第一段深跌後右側漲回起點、後面只有小拉回（杯子＋柄，玉晶光）→ 歸杯柄
@@ -928,12 +942,12 @@ def plot_chart(d, rec, pattern, res, path, cfg, font):
             patch.set_linewidth(0)
     axes[0].axhline(res["pivot"], color=TV["pivot"], linestyle="--", linewidth=1.0)
     axes[0].axhline(res["stop"], color=TV["stop"], linestyle="--", linewidth=1.0)
-    fig.savefig(str(png), dpi=100, bbox_inches="tight", facecolor="#FFFFFF")
+    fig.savefig(str(png), dpi=200, bbox_inches="tight", facecolor="#FFFFFF")   # 2026/11-20：200 dpi，手機與 Retina 螢幕放大也清楚
     import matplotlib.pyplot as plt
     plt.close(fig)
     # 轉成 JPEG 壓縮，讓網頁可以放下所有個股的圖
     from PIL import Image
-    Image.open(png).convert("RGB").save(path, "JPEG", quality=78, optimize=True)
+    Image.open(png).convert("RGB").save(path, "JPEG", quality=90, optimize=True)
     png.unlink(missing_ok=True)
 
 
