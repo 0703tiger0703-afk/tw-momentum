@@ -404,7 +404,6 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
       <button class="tab" role="tab" id="tab-stock" aria-selected="false" data-view="stock">RS</button>
       <button class="tab" role="tab" id="tab-themes" aria-selected="false" data-view="themes">細分族群</button>
       <button class="tab" role="tab" id="tab-pb" aria-selected="false" data-view="pb">抗跌股</button>
-      <button class="tab" role="tab" id="tab-tv" aria-selected="false" data-view="tv">TradingView</button>
       <button class="tab" role="tab" id="tab-disp" aria-selected="false" data-view="disp">處置股</button>
       <button class="tab" role="tab" id="tab-calc" aria-selected="false" data-view="calc">停損／張數</button>
     </nav>
@@ -755,7 +754,9 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
     const counts = Object.fromEntries(subs.map(k => [k, listOf(k).length]));
     const ttRows = SC.tt_pass.filter(r => D.stocks[r.code] && D.stocks[r.code].rs > SC.rs_min).sort((a, b) => D.stocks[b.code].rs - D.stocks[a.code].rs);
     let body;
-    if (screenSub === "TT") {
+    if (screenSub === "TV") {
+      body = tvHTML();
+    } else if (screenSub === "TT") {
       body = `<div class="tblwrap"><table><thead><tr><th class="l">股票</th><th class="l">產業</th><th>RS</th><th>收盤</th><th>距高點</th><th class="l">型態</th></tr></thead><tbody>${ttRows.map(r => {
         const it = SCMAP[r.code];
         const shape = it ? (it.listed ? `✓ ${it.pattern}・加分 ${it.bn}` : `${it.pattern}（必要未過）`) : "—";
@@ -769,16 +770,18 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
     main.innerHTML = `<section class="panel">
       <h2>型態篩選<small>篩選資料日 ${SC.as_of}・RS 資料日 ${D.as_of}・掃描 ${SC.scanned.toLocaleString()} 檔</small></h2>
       <div class="subtabs">${subs.map(k => `<button class="stab" data-sub="${k}" aria-pressed="${screenSub === k}">${PAT_NAMES[k]}<span class="num">${counts[k]}</span></button>`).join("")}
-        <button class="stab" data-sub="TT" aria-pressed="${screenSub === "TT"}">趨勢模板通過<span class="num">${ttRows.length}</span></button></div>
-        ${screenSub === "TT" ? "" : `<label class="slider" for="mb">最少加分 <input id="mb" type="range" min="0" max="7" value="${minBonus}"> <b class="num" id="mbv">${minBonus}</b></label>`}
+        <button class="stab" data-sub="TT" aria-pressed="${screenSub === "TT"}">趨勢模板通過<span class="num">${ttRows.length}</span></button>
+        <button class="stab" data-sub="TV" aria-pressed="${screenSub === "TV"}">TradingView</button></div>
+        ${screenSub === "TT" || screenSub === "TV" ? "" : `<label class="slider" for="mb">最少加分 <input id="mb" type="range" min="0" max="7" value="${minBonus}"> <b class="num" id="mbv">${minBonus}</b></label>`}
     </section>
     ${body}
     <section class="guide" aria-label="篩選說明">
       <section><h3>排序與歸類</h3><ul><li>加分多的排前面，同分比 RS</li><li>同一檔符合多種型態時，依 HTF → VCP → COH 歸類</li>
-        <li><b>VCP</b>　橫盤收縮：型態內高點不超過起點 3%，低點墊高</li><li><b>COH</b>　杯深 18–50%、杯身 ≥ 3 週，柄形成中也算</li>
-        <li><b>HTF</b>　旗桿 10 週內漲 ≥ 60%，且比起漲前舊高再高 25% 以上；旗形 1–8 週、回檔 ≤ 30%</li></ul></section>
+        <li><b>VCP</b>　橫盤收縮至少 3 次：型態內高點不超過起點 3%，低點墊高；第一段下跌超過 4 週、或右側漲回起點後只小幅拉回的，歸 COH</li>
+        <li><b>COH</b>　杯深 18–50%、杯身 3 週～約 8 個月；一定要有柄（右杯緣後拉回 ≥ 4%），柄的低點在杯子 40% 高度以上</li>
+        <li><b>HTF</b>　旗桿約 1 個月內漲 ≥ 40%，且比起漲前一年的高點再高 25% 以上；旗形最長約 5 週、回檔 ≤ 20%；突破後漲超過 10% 或超過 10 天就算結束</li></ul></section>
       <section><h3>必要條件（全部通過才列入）</h3><ol><li>RS &gt; ${SC.rs_min}</li><li>趨勢模板（Mark 的 50／150／200 日，第 7 條放寬到距高點 30%）</li>
-        <li>右上角：52 週高點在這次型態內，之前沒有更高的舊高</li><li>下跌量縮：近 20 日下跌日均量 &lt; 上漲日均量</li><li>VCP 最後一次收縮 &lt; 10%（日內高低點）</li></ol></section>
+        <li>右上角：52 週高點在這次型態內，52 週內沒有更高的舊高</li><li>下跌量縮：型態最後一次拉回（VCP 最後收縮、COH 的柄、HTF 的旗形）的均量 &lt; 型態均量 × 0.9；拉回不到 3 天先不判斷</li><li>VCP 最後一次收縮 &lt; 10%（日內高低點）</li></ol></section>
       <section><h3>加分條件（每項 1 分，滿分 7）</h3><ul><li><b>大量突破</b>　突破當天量 ≥ 50 日均量 1.5 倍</li><li><b>寬底</b>　VCP 或杯身整理 ≥ 7 週</li>
         <li><b>危險點</b>　Pivot 下方 7% 內有 EMA21 支撐</li><li><b>回檔淺</b>　型態最大回檔 ≤ 25%</li><li><b>均線往上</b>　EMA21、SMA50、SMA240 都往上</li>
         <li><b>抗跌</b>　大盤回檔時，個股跌不到大盤的一半</li><li><b>族群領導股</b>　所屬族群達強勢門檻，且在族群內是第一梯隊（前 3 名或前 3%、RS ≥ 90）</li></ul></section>
@@ -799,7 +802,8 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
         <button class="linkbtn" style="margin-left:10px" data-calc="${it.code}">算停損／張數 →</button></p></div>
       <div>${it.chart ? `<img src="${it.chart}" alt="${esc(it.name)} K 線圖">` : ""}</div></div></section>`;
   }
-  function renderTV() {
+  function renderTV() { screenSub = "TV"; setTab("screen"); renderScreen(); }
+  function tvHTML() {
     const tv = c => (D.stocks[c] ? (D.stocks[c].m === "twse" ? "TWSE:" : "TPEX:") : ((SCMAP[c] && SCMAP[c].market === "上櫃") ? "TPEX:" : "TWSE:")) + c;
     const groups = [];
     if (SC) {
@@ -808,7 +812,7 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
     }
     for (const t of D.themes.filter(x => x.is_strong)) groups.push([`強勢族群・${t.theme}`, sortRaw(D.theme_def[t.theme] || []).map(tv)]);
     const all = groups.filter(g => g[1].length).map(([n, cs]) => `###${n},${cs.join(",")}`).join("\n");
-    main.innerHTML = `<section class="panel"><h2>TradingView 代碼<small>上市標 TWSE、上櫃標 TPEX</small></h2>
+    return `<section class="panel"><h2>TradingView 代碼<small>上市標 TWSE、上櫃標 TPEX</small></h2>
       <p class="muted" style="font-size:13px;margin:0 0 10px">複製後貼到 TradingView 觀察清單的「新增商品」欄位；「複製全部」含 ### 分組標題，可另存成 .txt 用「匯入清單」一次建好分組。</p>
       <div class="tvb"><div class="tvh"><b>全部（含分組）</b><button class="btn" data-copy="tvall">複製全部</button></div><textarea class="tv" id="tvall" rows="4" readonly>${esc(all)}</textarea></div>
       ${groups.map(([n, cs], i) => `<div class="tvb"><div class="tvh"><b>${esc(n)}</b><span class="muted num">${cs.length}</span><button class="btn" data-copy="tv${i}">複製</button></div><textarea class="tv" id="tv${i}" rows="2" readonly>${esc(cs.join(","))}</textarea></div>`).join("")}
@@ -874,7 +878,7 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
   });
   document.addEventListener("click", async e => {
     const cb = e.target.closest("[data-calc]"); if (cb) { openCalc(cb.dataset.calc); return; }
-    const st = e.target.closest(".stab"); if (st && SC) { screenSub = st.dataset.sub; renderScreen(); return; }
+    const st = e.target.closest(".stab[data-sub]"); if (st && SC) { screenSub = st.dataset.sub; renderScreen(); return; }
     const cp = e.target.closest("[data-copy]");
     if (cp) { const ta = document.getElementById(cp.dataset.copy); try { await navigator.clipboard.writeText(ta.value); } catch (err) { ta.select(); }
       const o = cp.textContent; cp.textContent = "已複製"; setTimeout(() => cp.textContent = o, 1400); return; }
@@ -1132,7 +1136,7 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
     const h = (location.hash || "").replace("#", "");
     if (D.stocks[h]) go(h);
     else if (h === "themes") { setTab(h); renderRanking(h); }
-    else if (h === "tv") { setTab("tv"); renderTV(); }
+    else if (h === "tv") { renderTV(); }
     else if (h === "calc") { setTab("calc"); renderCalc(); }
     else if (h === "disp") { setTab("disp"); renderDisp(); }
     else if (h === "pb") { setTab("pb"); renderPB(); }
