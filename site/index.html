@@ -772,17 +772,17 @@ textarea.tv { width: 100%; font: 12.5px var(--font-num); border: 1px solid var(-
       <div class="subtabs">${subs.map(k => `<button class="stab" data-sub="${k}" aria-pressed="${screenSub === k}">${PAT_NAMES[k]}<span class="num">${counts[k]}</span></button>`).join("")}
         <button class="stab" data-sub="TT" aria-pressed="${screenSub === "TT"}">趨勢模板通過<span class="num">${ttRows.length}</span></button>
         <button class="stab" data-sub="TV" aria-pressed="${screenSub === "TV"}">TradingView</button></div>
-        ${screenSub === "TT" || screenSub === "TV" ? "" : `<label class="slider" for="mb">最少加分 <input id="mb" type="range" min="0" max="7" value="${minBonus}"> <b class="num" id="mbv">${minBonus}</b></label>`}
+        ${screenSub === "TT" || screenSub === "TV" ? "" : `<label class="slider" for="mb">最少加分 <input id="mb" type="range" min="0" max="8" value="${minBonus}"> <b class="num" id="mbv">${minBonus}</b></label>`}
     </section>
     ${body}
     <section class="guide" aria-label="篩選說明">
-      <section><h3>排序與歸類</h3><ul><li>加分多的排前面，同分比 RS</li><li>同一檔符合多種型態時，依 HTF → VCP → COH 歸類</li>
+      <section><h3>排序與歸類</h3><ul><li>加分多的排前面，同分比 RS</li><li>同一檔符合多種型態時，原則上依 HTF → VCP → COH 歸類；但旗桿後的整理已收縮 3 次以上歸 VCP，整理本身是很圓的杯子歸 COH</li>
         <li><b>VCP</b>　橫盤收縮至少 3 次：型態內高點不超過起點 3%，低點墊高；第一段下跌超過 4 週、或右側漲回起點後只小幅拉回的，歸 COH</li>
-        <li><b>COH</b>　杯深 18–50%、杯身 3 週～約 8 個月；一定要有柄（右杯緣後拉回 ≥ 4%），柄的低點在杯子 40% 高度以上</li>
-        <li><b>HTF</b>　旗桿約 1 個月內漲 ≥ 40%，且比起漲前一年的高點再高 25% 以上；旗形最長約 5 週、回檔 ≤ 20%；突破後漲超過 10% 或超過 10 天就算結束</li></ul></section>
+        <li><b>COH</b>　杯深 18–50%、杯身 3 週～約 10 個月；不到 5 週的小杯子要夠圓、夠對稱；一定要有柄（右杯緣後拉回 ≥ 4%），柄的低點在杯子 40% 高度以上（很圓的杯子可以更低）</li>
+        <li><b>HTF</b>　旗桿約 1 個月內漲 ≥ 40%，且比起漲前一年的高點再高 25% 以上；旗形最長約 5 週、回檔 ≤ 20%（旗形 10 天內可到 25%）；旗桿起漲前已大漲一倍的是延續漲勢、不算；突破後漲超過 10% 或超過 10 天就算結束</li></ul></section>
       <section><h3>必要條件（全部通過才列入）</h3><ol><li>RS &gt; ${SC.rs_min}</li><li>趨勢模板（Mark 的 50／150／200 日，第 7 條放寬到距高點 30%）</li>
         <li>右上角：52 週高點在這次型態內，52 週內沒有更高的舊高</li><li>下跌量縮：型態最後一次拉回（VCP 最後收縮、COH 的柄、HTF 的旗形）的均量 &lt; 型態均量 × 0.9；拉回不到 3 天先不判斷</li><li>VCP 最後一次收縮 &lt; 10%（日內高低點）</li></ol></section>
-      <section><h3>加分條件（每項 1 分，滿分 7）</h3><ul><li><b>大量突破</b>　突破當天量 ≥ 50 日均量 1.5 倍</li><li><b>寬底</b>　VCP 或杯身整理 ≥ 7 週</li>
+      <section><h3>加分條件（每項 1 分，滿分 8）</h3><ul><li><b>大量突破</b>　突破當天量 ≥ 50 日均量 1.5 倍</li><li><b>價格緊密</b>　突破前 10 天（還沒突破就看最近 10 天）至少 7 成的日子收盤漲跌 &lt; 4%</li><li><b>寬底</b>　VCP 或杯身整理 ≥ 7 週</li>
         <li><b>危險點</b>　Pivot 下方 7% 內有 EMA21 支撐</li><li><b>回檔淺</b>　型態最大回檔 ≤ 25%</li><li><b>均線往上</b>　EMA21、SMA50、SMA240 都往上</li>
         <li><b>抗跌</b>　大盤回檔時，個股跌不到大盤的一半</li><li><b>族群領導股</b>　所屬族群達強勢門檻，且在族群內是第一梯隊（前 3 名或前 3%、RS ≥ 90）</li></ul></section>
       <section><h3>符號與圖表</h3><ul><li><span class="bx y">✓</span> 符合　<span class="bx">✗</span> 不符合　<span class="bx na">—</span> 不適用或尚未發生</li>

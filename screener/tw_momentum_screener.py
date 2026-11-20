@@ -119,6 +119,9 @@ CONFIG = {
     "bonus_breakout_vol": 1.5,      # 加分：大量突破 = 突破當天量 ≥ 50 日均量 × 1.5
     "bonus_wide_base_days": 35,     # 加分：寬底 = VCP 基底或 COH 杯身整理 ≥ 7 週（35 個交易日）
     "bonus_risk_pct": 0.07,         # 加分：危險點 = Pivot 下方 7% 以內有 EMA21 支撐
+    "bonus_tight_days": 10,         # 加分：價格緊密 = 突破前 10 天（未突破看最近 10 天）
+    "bonus_tight_pct": 0.04,        #   每日收盤漲跌 < 4%（2026/11-20：你說 3% 左右，但你的範例實際多在 4% 內）
+    "bonus_tight_frac": 0.70,       #   至少 7 成的日子
     "bonus_shallow": 0.25,          # 加分：回檔淺 = 型態最大回檔 ≤ 25%
     "bonus_ma_rising_days": 5,      # 加分：均線都往上 = EMA21、SMA50、SMA240 都高於 5 天前
     "bonus_mkt_lookback": 63,       # 加分：大盤大跌、型態小跌 = 近 3 個月
@@ -722,6 +725,19 @@ def checklist(d, rec, pat, res, cfg, index_close=None):
                          f"{idx[j]:%m/%d} 突破量 = 50 日均量 × {ratio:.1f}")
     else:
         bonus["大量突破"] = (None, "尚未突破")
+
+    # 價格緊密（2026/11-20 依騰輝、冠西電、南亞範例）：突破前 10 天（還沒突破就看最近 10 天），
+    # 至少 7 成的日子收盤漲跌 < 4%
+    end = j if c[-1] > pivot else n                    # j＝突破日
+    tN = cfg["bonus_tight_days"]
+    if end - tN >= 1:
+        rr = np.abs(c[end - tN:end] / c[end - tN - 1:end - 1] - 1)
+        frac = float(np.mean(rr < cfg["bonus_tight_pct"]))
+        when = "突破前" if c[-1] > pivot else "最近"
+        bonus["價格緊密"] = (bool(frac >= cfg["bonus_tight_frac"]),
+                         f"{when} {tN} 天有 {frac:.0%} 的日子漲跌 < {cfg['bonus_tight_pct']:.0%}（最大 {rr.max():.1%}）")
+    else:
+        bonus["價格緊密"] = (None, "資料不足")
 
     if pat in ("VCP", "COH"):
         bd = res["base_days"]
