@@ -2,8 +2,13 @@ name: 每日更新
 
 on:
   schedule:
-    - cron: "30 6 * * 1-5"   # 台北 14:30（週一到週五；GitHub 排程可能延遲 5–30 分鐘）
-  workflow_dispatch:          # 可在 Actions 頁面手動按「Run workflow」
+    - cron: "*/15 6-10 * * 1-5"   # 台北 14:00–18:45 每 15 分鐘檢查一次（GitHub 排程可能延遲）
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "強制重跑全部（不管今天是否已完成）"
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -15,7 +20,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     env:
       TZ: Asia/Taipei
       PYTHONUNBUFFERED: "1"
@@ -23,33 +28,56 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: 判斷今天主資料是否已完成
+        id: gate
+        run: |
+          today=$(date +%F)
+          done=$(python3 - <<PY
+          import json
+          try:
+              s = json.load(open("site/status.json", encoding="utf-8"))
+              a = s.get("as_of", {})
+              print("yes" if a.get("data") == "$today" and a.get("screener") == "$today" and a.get("pullback") == "$today" else "no")
+          except Exception:
+              print("no")
+          PY
+          )
+          [ "${{ inputs.force }}" = "true" ] && done=no
+          echo "main_done=$done" >> $GITHUB_OUTPUT
+          echo "今天主資料已完成：$done"
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: pip
 
-      - name: 安裝中文字型與套件
-        run: |
-          sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk >/dev/null
-          pip install -q -r requirements.txt
+      - name: 安裝套件
+        run: pip install -q -r requirements.txt
+
+      - name: 安裝中文字型
+        if: steps.gate.outputs.main_done != 'yes'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq fonts-noto-cjk >/dev/null
 
       - name: RS 族群資料
         id: rs
+        if: steps.gate.outputs.main_done != 'yes'
         working-directory: rs/scripts
         run: |
           today=$(date +%F)
-          for i in $(seq 1 10); do
+          for i in 1 2 3; do
             out=$(python -u market_data.py --max-seconds 900 2>&1 | tail -8); echo "$out"
-            asof=$(python export_web.py --cached 2>&1 | tail -1 | python -c 'import sys,json;print(json.loads(sys.stdin.read()).get("as_of",""))' 2>/dev/null)
-            echo "RS 資料日：$asof"
-            if echo "$out" | grep -q '"complete": true' && [ "$asof" = "$today" ]; then break; fi
-            echo "第 $i 次：證交所／櫃買今天的資料還沒齊，3 分鐘後重試"; sleep 180
+            echo "$out" | grep -q '"complete": true' && break
+            sleep 60
           done
-          [ "$asof" = "$today" ] || echo "::warning::RS 資料日是 $asof，不是今天（休市或官方尚未公布）"
+          python export_web.py --cached 2>&1 | tail -1 | tee ../web/export.log
+          asof=$(python -c 'import json;print(json.load(open("../web/data.json"))["as_of"])')
+          echo "RS 資料日：$asof"
           cp ../web/data.json ../../site/data.json
+          echo "rs_today=$([ "$asof" = "$today" ] && echo yes || echo no)" >> $GITHUB_OUTPUT
 
       - name: 型態篩選與抗跌股
         id: screener
+        if: steps.gate.outputs.main_done != 'yes' && steps.rs.outputs.rs_today == 'yes'
         continue-on-error: true
         working-directory: screener
         run: |
@@ -58,7 +86,7 @@ jobs:
           cp output/site/screener.json ../site/screener.json
           [ -f output/site/pullback.json ] && cp output/site/pullback.json ../site/pullback.json || true
 
-      - name: 處置股
+      - name: 處置股（每次都更新）
         id: disposal
         continue-on-error: true
         working-directory: screener
@@ -73,14 +101,25 @@ jobs:
           def asof(f):
               try: return json.load(open(f, encoding="utf-8")).get("as_of")
               except Exception: return None
+          try: old = json.load(open("site/status.json", encoding="utf-8"))
+          except Exception: old = {}
+          now = dt.datetime.now().strftime("%Y-%m-%d %H:%M")
+          ran_main = "${{ steps.screener.outcome }}" not in ("", "skipped")
           log = open("screener/run.log", encoding="utf-8").read().splitlines() if os.path.exists("screener/run.log") else []
-          st = {
-            "run_at": dt.datetime.now().strftime("%Y-%m-%d %H:%M"),
-            "steps": {"rs": "${{ steps.rs.outcome }}", "screener": "${{ steps.screener.outcome }}", "disposal": "${{ steps.disposal.outcome }}"},
+          st = dict(old)
+          st.update({
+            "run_at": now,
+            "disposal_run_at": now if "${{ steps.disposal.outcome }}" == "success" else old.get("disposal_run_at"),
             "as_of": {k: asof(f"site/{k}.json") for k in ["data", "screener", "pullback", "disposal"]},
-            "pullback_error": next((l for l in log if "[抗跌股] 失敗" in l), None),
-            "screener_log_tail": log[-10:],
-          }
+          })
+          if ran_main:
+              st["main_run_at"] = now
+              st["steps"] = {"rs": "${{ steps.rs.outcome }}", "screener": "${{ steps.screener.outcome }}", "disposal": "${{ steps.disposal.outcome }}"}
+              st["pullback_error"] = next((l for l in log if "[抗跌股] 失敗" in l), None)
+              st["screener_log_tail"] = log[-10:]
+          else:
+              st.setdefault("steps", {})["disposal"] = "${{ steps.disposal.outcome }}"
+              st["note"] = "主資料今天已完成，這次只更新處置股" if "${{ steps.gate.outputs.main_done }}" == "yes" else "官方今天的收盤資料還沒公布，主資料下次再試"
           json.dump(st, open("site/status.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
           print(json.dumps(st, ensure_ascii=False, indent=1))
           PY
@@ -91,6 +130,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A site rs/web rs/scripts/.cache screener/cache
-          git diff --cached --quiet && { echo "沒有變更"; exit 0; }
-          git commit -q -m "每日更新 $(date +%F)"
+          # 只有狀態檔的時間變了就不必 commit
+          if git diff --cached --quiet -- . ':(exclude)site/status.json'; then echo "資料沒有變更"; exit 0; fi
+          git commit -q -m "每日更新 $(date '+%F %H:%M')"
           for i in 1 2 3; do git push && break; git pull --rebase -q; done
