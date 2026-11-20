@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-20 07:33",
+ "run_at": "2026-11-20 08:12",
  "steps": {
   "rs": "success",
   "screener": "success",
@@ -23,5 +23,7 @@
   "[輸出] 1 張 K 線圖 → output/2026-11-19/charts",
   "[輸出] 網站資料 output/site/screener.json（1 檔型態候選、28 檔通過趨勢模板）",
   "[輸出] 抗跌股 output/site/pullback.json（最近回檔 2026-11-11～2026-11-19 加權 -13.2%，725 檔）"
- ]
+ ],
+ "disposal_run_at": "2026-11-20 08:12",
+ "note": "官方今天的收盤資料還沒公布，主資料下次再試"
 }
