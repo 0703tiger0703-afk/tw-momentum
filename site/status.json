@@ -1,5 +1,5 @@
 {
- "run_at": "2026-11-20 14:33",
+ "run_at": "2026-11-20 22:49",
  "steps": {
   "rs": "success",
   "screener": "success",
@@ -9,7 +9,7 @@
   "data": "2026-11-20",
   "screener": "2026-11-20",
   "pullback": "2026-11-20",
-  "disposal": "2026-11-19"
+  "disposal": "2026-11-20"
  },
  "pullback_error": null,
  "screener_log_tail": [
@@ -24,7 +24,7 @@
   "[輸出] 網站資料 output/site/screener.json（0 檔型態候選、15 檔通過趨勢模板）",
   "[輸出] 抗跌股 output/site/pullback.json（最近回檔 2026-11-11～2026-11-20 加權 -18.6%，727 檔）"
  ],
- "disposal_run_at": "2026-11-20 14:33",
- "note": "官方今天的收盤資料還沒公布，主資料下次再試",
+ "disposal_run_at": "2026-11-20 22:49",
+ "note": "主資料今天已完成，這次只更新處置股",
  "main_run_at": "2026-11-20 14:33"
 }
