@@ -88,9 +88,16 @@ CONFIG = {
     "coh_min_handle_depth": 0.04,
     "coh_min_handle_days": 1,             # 柄最短 1 天（2026/11-20 試過 3 天：會誤殺世禾、玉晶光、倫飛）
     "coh_quick_handle_depth": 0.08,
+    "coh_slow_handle_days": 5,            # 柄拉回不到 6% 時至少要 5 天（2026/11-23 第三輪：億泰、創見只有杯沒有柄）
+    "coh_slow_handle_depth": 0.06,
+    "coh_one_day_min_u": 0.40,
+    "htf_to_coh_u": 0.45,                 # HTF、COH 都成立時，杯子 U 型度 ≥ 45% 就歸 COH（台嘉碩、杭特）            # 柄只有 1 天時，杯子要夠圓（U 型度 ≥ 40%），否則只是杯子右側的一根回檔（偉訓）
+    "vcp_hi_near_top": 0.12,              # 收縮的起點高點要在基底最高點 12% 內才算一次收縮，否則併入前一段（方土昶、偉訓）
+    "vcp_min_days_per_con": 4,            # 平均每段收縮至少 4 天；太短太多段是震盪，不是 VCP（彬台：18 天內 5 段）
     "htf_short_flag_days": 10,      # 旗形 10 天內，回檔可放寬到 25%（益安、哲固）
     "htf_short_flag_depth": 0.25,
-    "htf_max_prior_run": 1.00,        # 旗桿起點前 60 天已經漲超過 100%＝延續漲勢，不是新的旗桿（2026/11-20：興能高 122%、金居 249%；你判 HTF 的最多 66%）
+    "htf_max_prior_run": 1.00,        # 旗桿起點前 60 天已經漲超過 100%，旗形又超過 10 天＝延續漲勢、不是新的旗桿（11-20 興能高 122%／22 天）；
+                                      # 旗形在 10 天內的仍算 HTF（11-23 辣椒前漲 126%、旗形 7 天；詠昇多段旗桿）
     "coh_max_handle_depth": 0.20,
     "coh_min_handle_pos": 0.40,
     "coh_small_cup_days": 25,       # 小 COH（杯身不到 25 天）要夠圓：U 型度 ≥ 45%（2026/11-20：杭特 69%、倫飛 55%、玉晶光 45% 算；金居 28%、日月光 39%、勤誠 24% 不算）
@@ -389,6 +396,19 @@ def _vcp_from(d, bs, cfg):
     for a, b in zip(piv[:-1], piv[1:]):
         if a[2] == "H" and b[2] == "L":
             cons.append({"hi_i": a[0], "hi": a[1], "lo_i": b[0], "lo": b[1], "depth": 1 - b[1] / a[1]})
+    if cons and cfg.get("vcp_hi_near_top"):
+        # 反彈沒回到基底上緣附近的小波動，併入前一段（不算新的一次收縮）
+        top = h[bs]; merged = []
+        for x in cons:
+            top = max(top, x["hi"])
+            if merged and x["hi"] < top * (1 - cfg["vcp_hi_near_top"]):
+                m = merged[-1]
+                if x["lo"] < m["lo"]:
+                    m["lo"], m["lo_i"] = x["lo"], x["lo_i"]
+                m["depth"] = 1 - m["lo"] / m["hi"]
+            else:
+                merged.append(dict(x))
+        cons = merged
     if cons:
         # 從最深的一段開始算（基底高點附近的小晃動不算第一段收縮）
         k = int(np.argmax([x["depth"] for x in cons]))
@@ -399,6 +419,8 @@ def _vcp_from(d, bs, cfg):
         return fail(f"最大回檔僅 {depths[0]:.0%}，尚未形成真正的基底")
     if nC < cfg["vcp_min_contractions"]:
         return fail(f"收縮次數不足（{nC}）")
+    if nC and (n - 1 - cons[0]["hi_i"]) / nC < cfg["vcp_min_days_per_con"]:
+        return fail(f"{nC} 段收縮擠在 {n - 1 - cons[0]['hi_i']} 天內，是震盪不是 VCP")
     if nC > cfg["vcp_max_contractions"]:
         return fail(f"收縮次數過多（{nC}），結構鬆散")
     if depths[0] >= cfg["vcp_fail_first_depth"]:
@@ -510,6 +532,9 @@ def detect_coh(d, cfg):
         if h_depth < cfg["coh_min_handle_depth"]:
             last_reason = f"柄還沒拉回（{h_depth:.0%}）"
             continue
+        if hd < cfg["coh_slow_handle_days"] and h_depth < cfg["coh_slow_handle_depth"]:
+            last_reason = f"柄才 {hd} 天、拉回 {h_depth:.0%}，還沒成形"
+            continue
         if hd < cfg["coh_min_handle_days"] and h_depth < cfg["coh_quick_handle_depth"]:
             last_reason = f"柄才 {hd} 天、拉回 {h_depth:.0%}，還沒成形"
             continue
@@ -540,6 +565,9 @@ def detect_coh(d, cfg):
         u_fr = float(np.mean(u_c <= bottom + (hL - bottom) / 3))      # U 型度：杯身收盤落在下 1/3 的比例（越大越圓）
         if R - L < cfg["coh_small_cup_days"] and u_fr < cfg["coh_small_cup_min_u"]:
             last_reason = f"杯子只有 {R - L} 天、U 型度 {u_fr:.0%}，不夠圓不像杯子"
+            continue
+        if hd <= 1 and u_fr < cfg["coh_one_day_min_u"]:
+            last_reason = f"柄只有 1 天、杯子 U 型度 {u_fr:.0%} 不夠圓，還只是杯子"
             continue
         min_pos = cfg["coh_round_handle_pos"] if u_fr >= cfg["coh_round_u"] else cfg["coh_min_handle_pos"]
         if h_pos < min_pos:
@@ -621,7 +649,7 @@ def detect_htf(d, cfg):
         f_depth = 1 - flag_low / h[P]
         max_fd = cfg["htf_short_flag_depth"] if fd <= cfg["htf_short_flag_days"] else cfg["htf_max_flag_depth"]
         pre = l[max(0, S - 60):S]
-        if len(pre) and c[S] / pre.min() - 1 > cfg["htf_max_prior_run"]:
+        if len(pre) and c[S] / pre.min() - 1 > cfg["htf_max_prior_run"] and fd > cfg["htf_short_flag_days"]:
             last_reason = f"旗桿起點前已漲 {c[S] / pre.min() - 1:.0%}，是延續漲勢不是新的旗桿"
             continue
         if f_depth > max_fd:
@@ -886,8 +914,8 @@ def analyze(data, meta, cfg, asof, indexes=None):
         shape = next((k for k in SHAPE_ORDER if rec[k]["ok"]), None)
         if shape == "HTF" and rec["VCP"]["ok"] and rec["VCP"].get("n_con", 0) >= 3:
             shape = "VCP"                             # 旗桿後的整理裡已經收縮 3 次以上，算 VCP（2026/11-20 依金居）
-        if shape == "HTF" and rec["COH"]["ok"] and rec["COH"].get("u", 0) >= cfg["coh_round_u"]:
-            shape = "COH"                             # 旗形本身就是一個很圓的杯子＋柄，算小 COH（2026/11-20 依杭特）
+        if shape == "HTF" and rec["COH"]["ok"] and rec["COH"].get("u", 0) >= cfg["htf_to_coh_u"]:
+            shape = "COH"                             # 旗形本身就是一個夠圓的杯子＋柄，算小 COH（2026/11-20 依杭特、11-23 依台嘉碩）
         if shape == "VCP" and rec["COH"]["ok"]:
             vv = rec["VCP"]
             # 第一段下跌超過約 4 週（像圓底，光聯），或第一段深跌後右側漲回起點、後面只有小拉回（杯子＋柄，玉晶光）→ 歸杯柄
