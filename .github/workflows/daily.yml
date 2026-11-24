@@ -9,6 +9,10 @@ on:
         description: "強制重跑全部（不管今天是否已完成）"
         type: boolean
         default: false
+      asof:
+        description: "補跑某一天的型態篩選與抗跌股（YYYY-MM-DD，留空＝最新資料日）"
+        type: string
+        default: ""
 
 permissions:
   contents: write
@@ -43,6 +47,7 @@ jobs:
           PY
           )
           [ "${{ inputs.force }}" = "true" ] && done=no
+          [ -n "${{ inputs.asof }}" ] && done=no
           echo "main_done=$done" >> $GITHUB_OUTPUT
           echo "今天主資料已完成：$done"
 
@@ -75,14 +80,35 @@ jobs:
           cp ../web/data.json ../../site/data.json
           echo "rs_today=$([ "$asof" = "$today" ] && echo yes || echo no)" >> $GITHUB_OUTPUT
 
+      - name: 決定型態篩選的資料日
+        id: target
+        if: steps.gate.outputs.main_done != 'yes'
+        run: |
+          # 以 RS 抓到的最新資料日為準，不用日曆日期：GitHub 排程延遲到半夜才跑也不會被跳過
+          target="${{ inputs.asof }}"
+          [ -z "$target" ] && target=$(python3 -c 'import json;print(json.load(open("site/data.json"))["as_of"])')
+          run=$(python3 - "$target" "${{ inputs.asof }}" "${{ inputs.force }}" <<'PY'
+          import json, sys
+          target, manual, force = sys.argv[1], sys.argv[2], sys.argv[3]
+          def asof(f):
+              try: return json.load(open(f, encoding="utf-8")).get("as_of")
+              except Exception: return None
+          stale = asof("site/screener.json") != target or asof("site/pullback.json") != target
+          print("yes" if manual or force == "true" or stale else "no")
+          PY
+          )
+          echo "型態篩選資料日：$target，需要跑：$run"
+          echo "date=$target" >> $GITHUB_OUTPUT
+          echo "run=$run" >> $GITHUB_OUTPUT
+
       - name: 型態篩選與抗跌股
         id: screener
-        if: steps.gate.outputs.main_done != 'yes' && steps.rs.outputs.rs_today == 'yes'
+        if: steps.gate.outputs.main_done != 'yes' && steps.target.outputs.run == 'yes'
         continue-on-error: true
         working-directory: screener
         run: |
           set -o pipefail
-          python tw_momentum_screener.py --no-cache 2>&1 | tee run.log | tail -40
+          python tw_momentum_screener.py --no-cache --asof "${{ steps.target.outputs.date }}" 2>&1 | tee run.log | tail -40
           cp output/site/screener.json ../site/screener.json
           [ -f output/site/pullback.json ] && cp output/site/pullback.json ../site/pullback.json || true
 
