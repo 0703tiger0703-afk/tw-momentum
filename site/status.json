@@ -1,15 +1,15 @@
 {
- "run_at": "2026-11-24 12:07",
+ "run_at": "2026-11-25 01:01",
  "steps": {
   "rs": "success",
   "screener": "success",
   "disposal": "success"
  },
  "as_of": {
-  "data": "2026-11-23",
-  "screener": "2026-11-23",
-  "pullback": "2026-11-23",
-  "disposal": "2026-11-23"
+  "data": "2026-11-24",
+  "screener": "2026-11-24",
+  "pullback": "2026-11-24",
+  "disposal": "2026-11-24"
  },
  "pullback_error": null,
  "screener_log_tail": [
@@ -17,14 +17,14 @@
   "",
   "1 Failed download:",
   "['^TWOII']: possibly delisted; no timezone found",
-  "  已下載 1988/1988",
-  "[分析] 資料日 2026-11-23｜掃描 1984 檔｜趨勢模板通過 13｜新股通過 1",
-  "[輸出] output/2026-11-23/動能篩選_2026-11-23.xlsx",
-  "[輸出] 1 張 K 線圖 → output/2026-11-23/charts",
+  "  已下載 1987/1987",
+  "[分析] 資料日 2026-11-24｜掃描 1983 檔｜趨勢模板通過 13｜新股通過 1",
+  "[輸出] output/2026-11-24/動能篩選_2026-11-24.xlsx",
+  "[輸出] 1 張 K 線圖 → output/2026-11-24/charts",
   "[輸出] 網站資料 output/site/screener.json（1 檔型態候選、14 檔通過趨勢模板）",
-  "[輸出] 抗跌股 output/site/pullback.json（最近回檔 2026-11-11～2026-11-23 加權 -16.8%，742 檔）"
+  "[輸出] 抗跌股 output/site/pullback.json（最近回檔 2026-11-11～2026-11-20 加權 -18.6%，742 檔）"
  ],
- "disposal_run_at": "2026-11-24 12:07",
+ "disposal_run_at": "2026-11-25 01:01",
  "note": "官方今天的收盤資料還沒公布，主資料下次再試",
- "main_run_at": "2026-11-24 12:07"
+ "main_run_at": "2026-11-25 01:01"
 }
